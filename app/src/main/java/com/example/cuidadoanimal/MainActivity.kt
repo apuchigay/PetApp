@@ -3,45 +3,20 @@ package com.example.cuidadoanimal
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.cuidadoanimal.ui.theme.CuidadoAnimalTheme
+import com.example.cuidadoanimal.Screen.Navigation
+import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Obtener la instancia de la base de datos
+        val database = CuidadoAnimalDatabase.getDatabase(applicationContext)
+        val autenticacionDao = database.autenticacionDao() // Linea del error
+
         setContent {
-            CuidadoAnimalTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            // Pasar el autenticacionDao a la función de Navigation
+            Navigation(autenticacionDao = autenticacionDao)
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    CuidadoAnimalTheme {
-        Greeting("Android")
     }
 }

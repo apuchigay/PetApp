@@ -15,7 +15,8 @@ import com.example.cuidadoanimal.DAO.*
         Mascota::class,
         Servicio::class,
         SolicitudServicio::class,
-        HistorialMedico::class
+        HistorialMedico::class,
+        Autenticacion::class // Asegúrate de incluir la entidad Autenticacion
     ],
     version = 1,
     exportSchema = false
@@ -29,6 +30,9 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
     abstract fun servicioDao(): ServicioDao
     abstract fun solicitudServicioDao(): SolicitudServicioDao
     abstract fun historialMedicoDao(): HistorialMedicoDao
+
+
+    abstract fun autenticacionDao(): AutenticacionDao
 
     companion object {
         // Singleton to prevent multiple instances of database opening at the same time
