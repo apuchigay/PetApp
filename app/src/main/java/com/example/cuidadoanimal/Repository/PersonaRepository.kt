@@ -7,8 +7,8 @@ import kotlinx.coroutines.withContext
 
 class PersonaRepository(private val personaDao: PersonaDao) {
 
-    suspend fun insertPersona(persona: Persona) {
-        withContext(Dispatchers.IO) {
+    suspend fun insertPersona(persona: Persona): Long { // Cambiado para retornar Long
+        return withContext(Dispatchers.IO) {
             personaDao.insertPersona(persona)
         }
     }

@@ -7,7 +7,7 @@ import com.example.cuidadoanimal.Model.Persona
 interface PersonaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPersona(persona: Persona)
+    suspend fun insertPersona(persona: Persona): Long  // Cambiado a Long para retornar el ID
 
     @Update
     suspend fun updatePersona(persona: Persona)

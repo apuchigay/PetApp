@@ -22,8 +22,12 @@ class MainActivity : ComponentActivity() {
             // Crear el NavHostController
             val navController = rememberNavController()
 
-            // Pasar el navController y autenticacionRepository a la función de Navigation
-            Navigation(navController = navController, autenticacionRepository = autenticacionRepository)
+            // Pasar el navController, autenticacionRepository y database a la función de Navigation
+            Navigation(
+                navController = navController,
+                autenticacionRepository = autenticacionRepository,
+                db = database // Agregar la base de datos como parámetro
+            )
         }
     }
 }
