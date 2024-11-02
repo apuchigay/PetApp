@@ -4,8 +4,12 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
 import com.example.cuidadoanimal.Model.*
 import com.example.cuidadoanimal.DAO.*
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken
+import com.google.gson.Gson
 
 @Database(
     entities = [
@@ -16,11 +20,12 @@ import com.example.cuidadoanimal.DAO.*
         Servicio::class,
         SolicitudServicio::class,
         HistorialMedico::class,
-        Autenticacion::class // Asegúrate de incluir la entidad Autenticacion
+        Autenticacion::class
     ],
     version = 1,
     exportSchema = false
 )
+@TypeConverters(CuidadoAnimalDatabase.Converters::class) // Registrar el TypeConverter
 abstract class CuidadoAnimalDatabase : RoomDatabase() {
 
     abstract fun personaDao(): PersonaDao
@@ -30,12 +35,9 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
     abstract fun servicioDao(): ServicioDao
     abstract fun solicitudServicioDao(): SolicitudServicioDao
     abstract fun historialMedicoDao(): HistorialMedicoDao
-
-
     abstract fun autenticacionDao(): AutenticacionDao
 
     companion object {
-        // Singleton to prevent multiple instances of database opening at the same time
         @Volatile
         private var INSTANCE: CuidadoAnimalDatabase? = null
 
@@ -49,6 +51,21 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
                 INSTANCE = instance
                 instance
             }
+        }
+    }
+
+    // Clase para manejar conversiones de listas a cadenas y viceversa
+    class Converters {
+
+        @TypeConverter
+        fun fromString(value: String): List<String> {
+            val listType = object : TypeToken<List<String>>() {}.type
+            return Gson().fromJson(value, listType)
+        }
+
+        @TypeConverter
+        fun fromList(list: List<String>): String {
+            return Gson().toJson(list)
         }
     }
 }
