@@ -14,19 +14,15 @@ class MainActivity : ComponentActivity() {
 
         // Obtener la instancia de la base de datos
         val database = CuidadoAnimalDatabase.getDatabase(applicationContext)
-
-        // Crear una instancia del AutenticacionRepository con el DAO correspondiente
         val autenticacionRepository = AutenticacionRepository(database.autenticacionDao())
 
         setContent {
-            // Crear el NavHostController
             val navController = rememberNavController()
 
-            // Pasar el navController, autenticacionRepository y database a la función de Navigation
             Navigation(
                 navController = navController,
                 autenticacionRepository = autenticacionRepository,
-                db = database // Agregar la base de datos como parámetro
+                db = database
             )
         }
     }

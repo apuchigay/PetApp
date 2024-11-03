@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -19,6 +20,8 @@ import com.example.cuidadoanimal.Model.Persona
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
 import com.example.cuidadoanimal.Repository.PersonaRepository
 import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
+import com.example.cuidadoanimal.Model.Autenticacion
+import com.example.cuidadoanimal.Repository.AutenticacionRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,11 +34,13 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var especialidades by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var successMessage by remember { mutableStateOf("") }
 
-    // Crear instancias de los repositorios sin Hilt
+    // Crear instancias de los repositorios
     val trabajadorRepository = TrabajadorRepository(db.trabajadorDao())
     val personaRepository = PersonaRepository(db.personaDao())
+    val autenticacionRepository = AutenticacionRepository(db.autenticacionDao()) // Añadido
 
     Column(
         modifier = Modifier
@@ -115,10 +120,23 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            placeholder = { Text("Ingrese su contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         // Botón para confirmar registro
         Button(
             onClick = {
-                if (nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && especialidades.isNotBlank()) {
+                if (nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && especialidades.isNotBlank() && password.isNotBlank()) {
                     val nuevaPersona = Persona(
                         nombre = nombre,
                         email = email,
@@ -133,7 +151,18 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
                             especialidades = especialidades.split(",").map { it.trim() },
                             calificacion = 0.0f
                         )
+
+                        // Insertar trabajador
                         trabajadorRepository.insertTrabajador(nuevoTrabajador)
+
+                        // Insertar autenticación
+                        val nuevaAutenticacion = Autenticacion(
+                            email = email,
+                            password = password,
+                            trabajador_id = personaId // Asegúrate de usar el ID correcto aquí
+                        )
+                        autenticacionRepository.insertAutenticacion(nuevaAutenticacion)
+
                         successMessage = "Registro exitoso para $nombre"
                     }
                 } else {
@@ -144,6 +173,19 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9F02))
         ) {
             Text("Confirmar Registro")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Botón de volver
+        Button(
+            onClick = {
+                navController.popBackStack() // Vuelve a la pantalla anterior
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A7AF2))
+        ) {
+            Text("Volver", color = Color.White)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
