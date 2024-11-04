@@ -22,7 +22,7 @@ import com.google.gson.Gson
         HistorialMedico::class,
         Autenticacion::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(CuidadoAnimalDatabase.Converters::class) // Registrar el TypeConverter

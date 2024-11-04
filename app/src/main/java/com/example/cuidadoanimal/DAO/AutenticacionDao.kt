@@ -17,4 +17,10 @@ interface AutenticacionDao {
 
     @Query("SELECT * FROM autenticacion WHERE email = :email LIMIT 1")
     suspend fun getAutenticacionByEmail(email: String): Autenticacion?
+
+    @Query("SELECT * FROM autenticacion WHERE persona_id = :personaId LIMIT 1")
+    suspend fun getAutenticacionByPersonaId(personaId: Int): Autenticacion?
+
+    @Query("SELECT * FROM autenticacion WHERE tipo_usuario = :tipoUsuario")
+    suspend fun getAutenticacionesByTipoUsuario(tipoUsuario: Int): List<Autenticacion>
 }

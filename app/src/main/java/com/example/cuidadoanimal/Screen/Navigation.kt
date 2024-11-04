@@ -14,7 +14,7 @@ fun Navigation(navController: NavHostController, autenticacionRepository: Autent
             MainScreen(navController)
         }
         composable("cliente_screen") {
-            ClienteScreen(navController)
+            ClienteScreen(navController, db)
         }
         composable("trabajador_screen") {
             TrabajadorScreen(navController, db) // Se pasa `db` aquí

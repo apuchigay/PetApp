@@ -147,7 +147,7 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
                     CoroutineScope(Dispatchers.IO).launch {
                         val personaId = personaRepository.insertPersona(nuevaPersona).toInt()
                         val nuevoTrabajador = Trabajador(
-                            persona_id = personaId, // Convertido a Int
+                            persona_id = personaId,
                             especialidades = especialidades.split(",").map { it.trim() },
                             calificacion = 0.0f
                         )
@@ -155,11 +155,12 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
                         // Insertar trabajador
                         trabajadorRepository.insertTrabajador(nuevoTrabajador)
 
-                        // Insertar autenticación
+                        // Insertar autenticación con tipo de usuario 1 para trabajador
                         val nuevaAutenticacion = Autenticacion(
+                            persona_id = personaId,
                             email = email,
                             password = password,
-                            trabajador_id = personaId // Asegúrate de usar el ID correcto aquí
+                            tipo_usuario = 1
                         )
                         autenticacionRepository.insertAutenticacion(nuevaAutenticacion)
 
@@ -174,6 +175,7 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
         ) {
             Text("Confirmar Registro")
         }
+
 
         Spacer(modifier = Modifier.height(16.dp))
 

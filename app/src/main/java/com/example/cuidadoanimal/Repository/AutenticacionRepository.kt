@@ -18,7 +18,7 @@ class AutenticacionRepository(private val autenticacionDao: AutenticacionDao) {
     // Metodo para generar una clave AES
     private fun generateKey(): SecretKey {
         val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(256) // Puedes elegir 128, 192 o 256 bits
+        keyGenerator.init(256)
         return keyGenerator.generateKey()
     }
 
@@ -39,33 +39,37 @@ class AutenticacionRepository(private val autenticacionDao: AutenticacionDao) {
         return String(originalBytes)
     }
 
+    // Insertar autenticación con cifrado de contraseña
     suspend fun insertAutenticacion(autenticacion: Autenticacion) {
         withContext(Dispatchers.IO) {
-            // Cifrar la contraseña antes de insertar
             val encryptedPassword = encrypt(autenticacion.password)
-            autenticacionDao.insertAutenticacion(autenticacion.copy(password = encryptedPassword))
+            val autenticacionConCifrado = autenticacion.copy(password = encryptedPassword)
+            autenticacionDao.insertAutenticacion(autenticacionConCifrado)
         }
     }
 
+    // Actualizar autenticación
     suspend fun updateAutenticacion(autenticacion: Autenticacion) {
         withContext(Dispatchers.IO) {
             autenticacionDao.updateAutenticacion(autenticacion)
         }
     }
 
+    // Eliminar autenticación
     suspend fun deleteAutenticacion(autenticacion: Autenticacion) {
         withContext(Dispatchers.IO) {
             autenticacionDao.deleteAutenticacion(autenticacion)
         }
     }
 
+    // Obtener autenticación por email
     suspend fun getAutenticacionByEmail(email: String): Autenticacion? {
         return withContext(Dispatchers.IO) {
             autenticacionDao.getAutenticacionByEmail(email)
         }
     }
 
-    // Metodo para verificar la contraseña
+    // Verificar contraseña
     suspend fun verifyPassword(email: String, password: String): Boolean {
         val autenticacion = getAutenticacionByEmail(email)
         return if (autenticacion != null) {
@@ -73,6 +77,32 @@ class AutenticacionRepository(private val autenticacionDao: AutenticacionDao) {
             decryptedPassword == password
         } else {
             false
+        }
+    }
+
+    // Obtener autenticación por persona_id
+    suspend fun getAutenticacionByPersonaId(personaId: Int): Autenticacion? {
+        return withContext(Dispatchers.IO) {
+            autenticacionDao.getAutenticacionByPersonaId(personaId)
+        }
+    }
+
+    // Insertar autenticación con tipo de usuario (1 para trabajador, 2 para cliente)
+    suspend fun insertAutenticacionWithUserType(
+        personaId: Int,
+        email: String,
+        password: String,
+        tipoUsuario: Int
+    ) {
+        withContext(Dispatchers.IO) {
+            val encryptedPassword = encrypt(password)
+            val autenticacion = Autenticacion(
+                persona_id = personaId,
+                email = email,
+                password = encryptedPassword,
+                tipo_usuario = tipoUsuario
+            )
+            autenticacionDao.insertAutenticacion(autenticacion)
         }
     }
 }
