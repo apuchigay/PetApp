@@ -39,7 +39,10 @@ fun ClienteScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
     // Crear instancias de los repositorios
     val clienteRepository = ClienteRepository(db.clienteDao())
     val personaRepository = PersonaRepository(db.personaDao())
-    val autenticacionRepository = AutenticacionRepository(db.autenticacionDao())
+    val autenticacionRepository = AutenticacionRepository(
+        db.autenticacionDao(),
+        db.personaDao() // Agrega personaDao aquí
+    )
 
     Column(
         modifier = Modifier

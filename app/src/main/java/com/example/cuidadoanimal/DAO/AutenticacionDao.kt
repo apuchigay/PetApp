@@ -23,4 +23,8 @@ interface AutenticacionDao {
 
     @Query("SELECT * FROM autenticacion WHERE tipo_usuario = :tipoUsuario")
     suspend fun getAutenticacionesByTipoUsuario(tipoUsuario: Int): List<Autenticacion>
+
+    // Nueva función para obtener usuario por ID
+    @Query("SELECT * FROM autenticacion WHERE persona_id = :userId LIMIT 1")
+    suspend fun getUserById(userId: Int): Autenticacion?
 }

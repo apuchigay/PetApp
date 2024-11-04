@@ -40,7 +40,11 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
     // Crear instancias de los repositorios
     val trabajadorRepository = TrabajadorRepository(db.trabajadorDao())
     val personaRepository = PersonaRepository(db.personaDao())
-    val autenticacionRepository = AutenticacionRepository(db.autenticacionDao()) // Añadido
+    val autenticacionRepository = AutenticacionRepository(
+        db.autenticacionDao(),
+        db.personaDao() // Agrega personaDao aquí
+    )
+
 
     Column(
         modifier = Modifier

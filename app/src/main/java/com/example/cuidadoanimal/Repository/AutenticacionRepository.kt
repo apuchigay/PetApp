@@ -1,50 +1,31 @@
 package com.example.cuidadoanimal.Repository
 
 import com.example.cuidadoanimal.DAO.AutenticacionDao
+import com.example.cuidadoanimal.DAO.PersonaDao
 import com.example.cuidadoanimal.Model.Autenticacion
+import com.example.cuidadoanimal.Model.Persona
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.SecretKeySpec
-import android.util.Base64
+import java.security.MessageDigest
 
-class AutenticacionRepository(private val autenticacionDao: AutenticacionDao) {
+class AutenticacionRepository(
+    private val autenticacionDao: AutenticacionDao,
+    private val personaDao: PersonaDao // DAO de Persona añadido
+) {
 
-    // Generar una clave de cifrado
-    private val secretKey: SecretKey = generateKey()
-
-    // Metodo para generar una clave AES
-    private fun generateKey(): SecretKey {
-        val keyGenerator = KeyGenerator.getInstance("AES")
-        keyGenerator.init(256)
-        return keyGenerator.generateKey()
+    // Convertir una cadena a su hash MD5
+    private fun hashMD5(password: String): String {
+        val md = MessageDigest.getInstance("MD5")
+        val hashBytes = md.digest(password.toByteArray())
+        return hashBytes.joinToString("") { "%02x".format(it) } // Convertir bytes a hexadecimal
     }
 
-    // Metodo para cifrar contraseñas
-    private fun encrypt(password: String): String {
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey)
-        val encryptedBytes = cipher.doFinal(password.toByteArray())
-        return Base64.encodeToString(encryptedBytes, Base64.DEFAULT)
-    }
-
-    // Metodo para descifrar contraseñas
-    private fun decrypt(encryptedPassword: String): String {
-        val cipher = Cipher.getInstance("AES")
-        cipher.init(Cipher.DECRYPT_MODE, secretKey)
-        val decodedBytes = Base64.decode(encryptedPassword, Base64.DEFAULT)
-        val originalBytes = cipher.doFinal(decodedBytes)
-        return String(originalBytes)
-    }
-
-    // Insertar autenticación con cifrado de contraseña
+    // Insertar autenticación con hash de contraseña
     suspend fun insertAutenticacion(autenticacion: Autenticacion) {
         withContext(Dispatchers.IO) {
-            val encryptedPassword = encrypt(autenticacion.password)
-            val autenticacionConCifrado = autenticacion.copy(password = encryptedPassword)
-            autenticacionDao.insertAutenticacion(autenticacionConCifrado)
+            val hashedPassword = hashMD5(autenticacion.password)
+            val autenticacionConHash = autenticacion.copy(password = hashedPassword)
+            autenticacionDao.insertAutenticacion(autenticacionConHash)
         }
     }
 
@@ -73,8 +54,8 @@ class AutenticacionRepository(private val autenticacionDao: AutenticacionDao) {
     suspend fun verifyPassword(email: String, password: String): Boolean {
         val autenticacion = getAutenticacionByEmail(email)
         return if (autenticacion != null) {
-            val decryptedPassword = decrypt(autenticacion.password)
-            decryptedPassword == password
+            val hashedPassword = hashMD5(password)
+            hashedPassword == autenticacion.password
         } else {
             false
         }
@@ -95,14 +76,23 @@ class AutenticacionRepository(private val autenticacionDao: AutenticacionDao) {
         tipoUsuario: Int
     ) {
         withContext(Dispatchers.IO) {
-            val encryptedPassword = encrypt(password)
+            val hashedPassword = hashMD5(password)
             val autenticacion = Autenticacion(
                 persona_id = personaId,
                 email = email,
-                password = encryptedPassword,
+                password = hashedPassword,
                 tipo_usuario = tipoUsuario
             )
             autenticacionDao.insertAutenticacion(autenticacion)
+        }
+    }
+
+    // Obtener datos de Autenticacion y Persona por persona_id
+    suspend fun getUserWithDetailsById(personaId: Int): Pair<Autenticacion?, Persona?> {
+        return withContext(Dispatchers.IO) {
+            val autenticacion = autenticacionDao.getAutenticacionByPersonaId(personaId)
+            val persona = autenticacion?.let { personaDao.getPersonaById(it.persona_id) }
+            Pair(autenticacion, persona)
         }
     }
 }
