@@ -31,20 +31,27 @@ import kotlinx.coroutines.launch
 fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
     var nombre by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var isEmailValid by remember { mutableStateOf(true) }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var especialidades by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var successMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") }
 
     // Crear instancias de los repositorios
     val trabajadorRepository = TrabajadorRepository(db.trabajadorDao())
     val personaRepository = PersonaRepository(db.personaDao())
     val autenticacionRepository = AutenticacionRepository(
         db.autenticacionDao(),
-        db.personaDao() // Agrega personaDao aquí
+        db.personaDao()
     )
 
+    // Función para validar el correo electrónico
+    fun isValidEmail(email: String): Boolean {
+        val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+        return email.matches(emailPattern)
+    }
 
     Column(
         modifier = Modifier
@@ -62,7 +69,7 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        // Campos de entrada
+        // Campo de nombre
         TextField(
             value = nombre,
             onValueChange = { nombre = it },
@@ -74,20 +81,38 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de correo electrónico con validación
         TextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                isEmailValid = isValidEmail(it) // Validación en tiempo real
+            },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color(0xFFD4E4FF),
+                errorIndicatorColor = if (!isEmailValid) Color.Red else Color.Transparent
+            ),
+            isError = !isEmailValid,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             )
         )
 
+        if (!isEmailValid) {
+            Text(
+                text = "Por favor, ingresa un correo válido",
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.align(Alignment.Start).padding(top = 4.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de teléfono
         TextField(
             value = telefono,
             onValueChange = { telefono = it },
@@ -102,6 +127,7 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de dirección
         TextField(
             value = direccion,
             onValueChange = { direccion = it },
@@ -113,6 +139,7 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de especialidades
         TextField(
             value = especialidades,
             onValueChange = { especialidades = it },
@@ -124,6 +151,7 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Campo de contraseña
         TextField(
             value = password,
             onValueChange = { password = it },
@@ -141,37 +169,50 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
         Button(
             onClick = {
                 if (nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && especialidades.isNotBlank() && password.isNotBlank()) {
-                    val nuevaPersona = Persona(
-                        nombre = nombre,
-                        email = email,
-                        telefono = telefono,
-                        direccion = direccion
-                    )
-
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val personaId = personaRepository.insertPersona(nuevaPersona).toInt()
-                        val nuevoTrabajador = Trabajador(
-                            persona_id = personaId,
-                            especialidades = especialidades.split(",").map { it.trim() },
-                            calificacion = 0.0f
-                        )
-
-                        // Insertar trabajador
-                        trabajadorRepository.insertTrabajador(nuevoTrabajador)
-
-                        // Insertar autenticación con tipo de usuario 1 para trabajador
-                        val nuevaAutenticacion = Autenticacion(
-                            persona_id = personaId,
+                    if (isEmailValid) {
+                        val nuevaPersona = Persona(
+                            nombre = nombre,
                             email = email,
-                            password = password,
-                            tipo_usuario = 1
+                            telefono = telefono,
+                            direccion = direccion
                         )
-                        autenticacionRepository.insertAutenticacion(nuevaAutenticacion)
 
-                        successMessage = "Registro exitoso para $nombre"
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val personaId = personaRepository.insertPersona(nuevaPersona).toInt()
+                            val nuevoTrabajador = Trabajador(
+                                persona_id = personaId,
+                                especialidades = especialidades.split(",").map { it.trim() },
+                                calificacion = 0.0f
+                            )
+
+                            trabajadorRepository.insertTrabajador(nuevoTrabajador)
+
+                            autenticacionRepository.insertAutenticacionWithUserType(
+                                personaId = personaId,
+                                email = email,
+                                password = password,
+                                tipoUsuario = 1
+                            )
+
+                            successMessage = "Registro exitoso para $nombre"
+                            errorMessage = ""
+
+                            // Limpiar el formulario
+                            nombre = ""
+                            email = ""
+                            telefono = ""
+                            direccion = ""
+                            especialidades = ""
+                            password = ""
+                            isEmailValid = true
+                        }
+                    } else {
+                        errorMessage = "Por favor, ingresa un correo válido"
+                        successMessage = ""
                     }
                 } else {
-                    successMessage = "Por favor, completa todos los campos"
+                    errorMessage = "Por favor, completa todos los campos"
+                    successMessage = ""
                 }
             },
             modifier = Modifier.fillMaxWidth(),
@@ -180,13 +221,11 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
             Text("Confirmar Registro")
         }
 
-
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Botón de volver
         Button(
             onClick = {
-                navController.popBackStack() // Vuelve a la pantalla anterior
+                navController.popBackStack()
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A7AF2))
@@ -195,6 +234,10 @@ fun TrabajadorScreen(navController: NavHostController, db: CuidadoAnimalDatabase
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+
+        if (errorMessage.isNotBlank()) {
+            Text(text = errorMessage, color = Color.Red)
+        }
 
         if (successMessage.isNotBlank()) {
             Text(text = successMessage, color = Color.White)

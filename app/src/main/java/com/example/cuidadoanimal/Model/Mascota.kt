@@ -1,5 +1,6 @@
 package com.example.cuidadoanimal.Model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
@@ -20,5 +21,5 @@ data class Mascota(
     val edad: Int,
     val raza: String,
     val peso: Double,
-    val cliente_id: Int  // Foreign key referencing Cliente
+    @ColumnInfo(name = "cliente_id") val clienteId: Int  // Foreign key referencing Cliente
 )

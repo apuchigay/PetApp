@@ -10,7 +10,7 @@ import java.security.MessageDigest
 
 class AutenticacionRepository(
     private val autenticacionDao: AutenticacionDao,
-    private val personaDao: PersonaDao // DAO de Persona añadido
+    private val personaDao: PersonaDao
 ) {
 
     // Convertir una cadena a su hash MD5
@@ -87,10 +87,19 @@ class AutenticacionRepository(
         }
     }
 
+    // Nueva función para autenticar usuario con email y password
+    suspend fun autenticarUsuario(email: String, password: String): Autenticacion? {
+        return withContext(Dispatchers.IO) {
+            val hashedPassword = hashMD5(password)
+            autenticacionDao.getAutenticacionByEmailAndPassword(email, hashedPassword)
+        }
+    }
+
     // Obtener datos de Autenticacion y Persona por persona_id
     suspend fun getUserWithDetailsById(personaId: Int): Pair<Autenticacion?, Persona?> {
         return withContext(Dispatchers.IO) {
             val autenticacion = autenticacionDao.getAutenticacionByPersonaId(personaId)
+            // Obtener datos de la persona solo si se encontró autenticación
             val persona = autenticacion?.let { personaDao.getPersonaById(it.persona_id) }
             Pair(autenticacion, persona)
         }

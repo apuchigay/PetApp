@@ -20,4 +20,8 @@ interface MascotaDao {
 
     @Query("SELECT * FROM mascotas WHERE mascotaId = :id")
     suspend fun getMascotaById(id: Int): Mascota?
+
+    // Nueva función para obtener todas las mascotas de un cliente específico
+    @Query("SELECT * FROM mascotas WHERE cliente_id = :clienteId")
+    suspend fun getMascotasByClienteId(clienteId: Int): List<Mascota>
 }

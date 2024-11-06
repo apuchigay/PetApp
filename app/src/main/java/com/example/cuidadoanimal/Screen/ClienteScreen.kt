@@ -1,5 +1,3 @@
-package com.example.cuidadoanimal.Screen
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -35,14 +33,18 @@ fun ClienteScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
     var direccion by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var successMessage by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf("") } // Mensaje de error para el correo
 
     // Crear instancias de los repositorios
     val clienteRepository = ClienteRepository(db.clienteDao())
     val personaRepository = PersonaRepository(db.personaDao())
     val autenticacionRepository = AutenticacionRepository(
         db.autenticacionDao(),
-        db.personaDao() // Agrega personaDao aquí
+        db.personaDao()
     )
+
+    // Expresión regular para validar el formato del correo electrónico
+    val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
 
     Column(
         modifier = Modifier
@@ -74,15 +76,22 @@ fun ClienteScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
 
         TextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                errorMessage = if (emailRegex.matches(it)) "" else "Correo no válido"
+            },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
+            isError = errorMessage.isNotEmpty(),
             colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             )
         )
+        if (errorMessage.isNotEmpty()) {
+            Text(text = errorMessage, color = Color.Red, fontSize = 12.sp)
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -127,7 +136,7 @@ fun ClienteScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
         // Botón para confirmar registro
         Button(
             onClick = {
-                if (nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && password.isNotBlank()) {
+                if (nombre.isNotBlank() && emailRegex.matches(email) && telefono.isNotBlank() && direccion.isNotBlank() && password.isNotBlank()) {
                     val nuevaPersona = Persona(
                         nombre = nombre,
                         email = email,
@@ -153,6 +162,14 @@ fun ClienteScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
                         )
 
                         successMessage = "Registro exitoso para $nombre"
+
+                        // Limpiar los campos después del registro exitoso
+                        nombre = ""
+                        email = ""
+                        telefono = ""
+                        direccion = ""
+                        password = ""
+                        errorMessage = ""
                     }
                 } else {
                     successMessage = "Por favor, completa todos los campos"

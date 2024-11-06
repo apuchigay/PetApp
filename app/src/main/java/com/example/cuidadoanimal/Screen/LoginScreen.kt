@@ -102,8 +102,16 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
                         autenticacionRepository.verifyPassword(email, password)
                     }
                     if (isValidUser) {
-                        // Redirigir a InicioScreen
-                        navController.navigate("inicio_screen")
+                        // Obtener el usuario para redirigir a inicio_screen
+                        val autenticacion = withContext(Dispatchers.IO) {
+                            autenticacionRepository.getAutenticacionByEmail(email)
+                        }
+                        if (autenticacion != null) {
+                            // Redirigir a inicio_screen pasando el id de usuario
+                            navController.navigate("inicio_screen/${autenticacion.persona_id}") // Asegúrate de pasar el id de persona
+                        } else {
+                            errorMessage = "Usuario no encontrado"
+                        }
                     } else {
                         errorMessage = "Correo o contraseña incorrectos"
                     }
