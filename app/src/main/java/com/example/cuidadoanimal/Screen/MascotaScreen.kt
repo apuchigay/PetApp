@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,98 +25,130 @@ import kotlinx.coroutines.withContext
 @Composable
 fun MascotaScreen(
     navController: NavHostController,
-    clienteId: Int, // ID del cliente que se pasa desde InicioScreen
+    clienteId: Int,
     mascotaRepository: MascotaRepository
 ) {
     val coroutineScope = rememberCoroutineScope()
     var mascotas by remember { mutableStateOf<List<Mascota>>(emptyList()) }
-    var showDialog by remember { mutableStateOf(false) } // Controlar diálogo para agregar/editar mascota
+    var showDialog by remember { mutableStateOf(false) }
+    var showConfirmDelete by remember { mutableStateOf(false) }
+    var selectedMascota by remember { mutableStateOf<Mascota?>(null) }
+    var isEditing by remember { mutableStateOf(false) }
 
-    // Obtener la lista de mascotas para el cliente
+    // Obtener la lista de mascotas
     LaunchedEffect(clienteId) {
         mascotas = withContext(Dispatchers.IO) {
             mascotaRepository.getMascotasByClienteId(clienteId)
         }
     }
 
-    // Función para agregar una nueva mascota
-    fun addMascota(mascota: Mascota) {
+    // Función para agregar/editar mascota
+    fun saveMascota(mascota: Mascota) {
         coroutineScope.launch {
             withContext(Dispatchers.IO) {
-                mascotaRepository.addMascota(mascota)
+                if (isEditing) {
+                    mascotaRepository.updateMascota(mascota)
+                } else {
+                    mascotaRepository.addMascota(mascota)
+                }
             }
-            // Actualizar la lista de mascotas después de agregar
             mascotas = mascotaRepository.getMascotasByClienteId(clienteId)
+            isEditing = false
         }
     }
 
-    // Función para eliminar una mascota
-    fun deleteMascota(mascota: Mascota) {
+    // Función para eliminar mascota
+    fun deleteMascota() {
         coroutineScope.launch {
-            withContext(Dispatchers.IO) {
-                mascotaRepository.deleteMascota(mascota)
+            selectedMascota?.let {
+                withContext(Dispatchers.IO) {
+                    mascotaRepository.deleteMascota(it)
+                }
+                mascotas = mascotaRepository.getMascotasByClienteId(clienteId)
             }
-            // Actualizar la lista después de eliminar
-            mascotas = mascotaRepository.getMascotasByClienteId(clienteId)
+            showConfirmDelete = false
         }
     }
 
-    // Estructura de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF3F4F6))
             .padding(16.dp)
     ) {
-        // Botón de regreso al menú principal
         IconButton(
-            onClick = { navController.navigate("InicioScreen") }, // Navega a InicioScreen
+            onClick = {
+                navController.navigate("inicio_screen/$clienteId")
+            },
             modifier = Modifier.align(Alignment.Start)
         ) {
             Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.Black)
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+        Text("Gestión de Mascotas", fontSize = 24.sp, color = Color.Black, modifier = Modifier.padding(bottom = 16.dp))
 
-        // Título de la pantalla
-        Text(
-            text = "Gestión de Mascotas",
-            fontSize = 24.sp,
-            color = Color.Black,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Botón para agregar nueva mascota
         Button(
-            onClick = { showDialog = true },
+            onClick = {
+                showDialog = true
+                isEditing = false
+            },
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563))
         ) {
             Text("Añadir Nueva Mascota")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Lista de mascotas
         LazyColumn {
             items(mascotas) { mascota ->
                 MascotaItem(
                     mascota = mascota,
-                    onDelete = { deleteMascota(mascota) }
+                    onEdit = {
+                        selectedMascota = mascota
+                        showDialog = true
+                        isEditing = true
+                    },
+                    onDelete = {
+                        selectedMascota = mascota
+                        showConfirmDelete = true
+                    }
                 )
             }
         }
     }
 
-    // Mostrar diálogo para agregar/editar mascota
     if (showDialog) {
         MascotaDialog(
             onDismiss = { showDialog = false },
             onSave = { newMascota ->
-                addMascota(newMascota)
+                saveMascota(newMascota)
                 showDialog = false
             },
-            clienteId = clienteId
+            clienteId = clienteId,
+            mascota = if (isEditing) selectedMascota else null
+        )
+    }
+
+    if (showConfirmDelete) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDelete = false },
+            confirmButton = {
+                Button(
+                    onClick = { deleteMascota() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563))
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showConfirmDelete = false }) {
+                    Text("Cancelar")
+                }
+            },
+            title = { Text("Confirmación") },
+            text = { Text("¿Estás seguro de que deseas eliminar esta mascota?") }
         )
     }
 }
@@ -123,6 +156,7 @@ fun MascotaScreen(
 @Composable
 fun MascotaItem(
     mascota: Mascota,
+    onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
     Card(
@@ -141,8 +175,13 @@ fun MascotaItem(
                 Text(text = "Tipo: ${mascota.tipo}", fontSize = 14.sp, color = Color.Gray)
                 Text(text = "Edad: ${mascota.edad}", fontSize = 14.sp, color = Color.Gray)
             }
-            IconButton(onClick = onDelete) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar")
+            Row {
+                IconButton(onClick = onEdit) {
+                    Icon(imageVector = Icons.Default.Edit, contentDescription = "Editar", tint = Color.Gray)
+                }
+                IconButton(onClick = onDelete) {
+                    Icon(imageVector = Icons.Default.Delete, contentDescription = "Eliminar", tint = Color.Gray)
+                }
             }
         }
     }
@@ -152,20 +191,22 @@ fun MascotaItem(
 fun MascotaDialog(
     onDismiss: () -> Unit,
     onSave: (Mascota) -> Unit,
-    clienteId: Int
+    clienteId: Int,
+    mascota: Mascota? = null
 ) {
-    var nombre by remember { mutableStateOf("") }
-    var tipo by remember { mutableStateOf("") }
-    var edad by remember { mutableStateOf("") }
-    var raza by remember { mutableStateOf("") }
-    var peso by remember { mutableStateOf("") }
+    var nombre by remember { mutableStateOf(mascota?.nombre ?: "") }
+    var tipo by remember { mutableStateOf(mascota?.tipo ?: "") }
+    var edad by remember { mutableStateOf(mascota?.edad?.toString() ?: "") }
+    var raza by remember { mutableStateOf(mascota?.raza ?: "") }
+    var peso by remember { mutableStateOf(mascota?.peso?.toString() ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(
                 onClick = {
-                    val mascota = Mascota(
+                    val newMascota = Mascota(
+                        mascotaId = mascota?.mascotaId ?: 0,
                         nombre = nombre,
                         tipo = tipo,
                         edad = edad.toIntOrNull() ?: 0,
@@ -173,8 +214,9 @@ fun MascotaDialog(
                         peso = peso.toDoubleOrNull() ?: 0.0,
                         clienteId = clienteId
                     )
-                    onSave(mascota)
-                }
+                    onSave(newMascota)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563))
             ) {
                 Text("Guardar")
             }
@@ -184,9 +226,12 @@ fun MascotaDialog(
                 Text("Cancelar")
             }
         },
-        title = { Text("Agregar Mascota") },
+        title = { Text(if (mascota == null) "Agregar Mascota" else "Editar Mascota") },
         text = {
-            Column {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.background(Color(0xFF9D9D9E))
+            ) {
                 TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") })
                 TextField(value = tipo, onValueChange = { tipo = it }, label = { Text("Tipo") })
                 TextField(value = edad, onValueChange = { edad = it }, label = { Text("Edad") })
