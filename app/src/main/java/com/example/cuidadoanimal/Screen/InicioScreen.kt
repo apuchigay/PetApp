@@ -2,11 +2,19 @@ package com.example.cuidadoanimal.Screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DirectionsWalk
+import androidx.compose.material.icons.outlined.MedicalServices
+import androidx.compose.material.icons.outlined.Pets
+import androidx.compose.material.icons.outlined.Spa
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,7 +30,6 @@ fun InicioScreen(
     autenticacionRepository: AutenticacionRepository
 ) {
     var welcomeMessage by remember { mutableStateOf("Cargando...") }
-    var roleMessage by remember { mutableStateOf("") }
     var tipoUsuario by remember { mutableStateOf<Int?>(null) } // Identifica el rol
 
     // Obtener datos del usuario y el rol
@@ -32,14 +39,8 @@ fun InicioScreen(
         }
 
         if (autenticacion != null && persona != null) {
-            welcomeMessage = "Bienvenido/a, ${persona.nombre}"
+            welcomeMessage = "Bienvenid@, ${persona.nombre}"
             tipoUsuario = autenticacion.tipo_usuario
-
-            roleMessage = when (tipoUsuario) {
-                1 -> "Rol: Trabajador"
-                2 -> "Rol: Cliente"
-                else -> "Rol desconocido"
-            }
         }
     }
 
@@ -47,53 +48,91 @@ fun InicioScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2B303F))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFFFFFFF), Color(0xFFE76A68))
+                )
+            )
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Mensaje de bienvenida
         Text(
             text = welcomeMessage,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = Color.Black,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Rol del usuario
-        Text(
-            text = roleMessage,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.White,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Opciones basadas en el rol
-        if (tipoUsuario == 2) {
-            // Opciones para el Cliente
-            Button(
-                onClick = {
-                    navController.navigate("mascota_screen/$userId") // `userId` debe corresponder a `clienteId` del cliente
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
+        // Contenedor para los botones de opciones (20% de la pantalla)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height((0.2f * LocalConfiguration.current.screenHeightDp).dp) // Corrección aquí
+                .background(Color(0xFFF7F9F8), RoundedCornerShape(16.dp))
+                .padding(8.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Gestión de Mascotas")
-            }
+                // Botón de Registrar Mascota (habilitado)
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("mascota_screen/$userId")
+                    },
+                    containerColor = Color(0xFFFF9F02)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Pets,
+                        contentDescription = "Registrar Mascota",
+                        tint = Color.White
+                    )
+                }
 
-            // Aquí puedes agregar otros botones o funciones específicas para el cliente
-            // Ejemplo: Historial de servicios, Solicitar servicio, etc.
-        } else if (tipoUsuario == 1) {
-            // Mensaje para el Trabajador
-            Text(
-                text = "Nuevas funciones próximamente",
-                fontSize = 16.sp,
-                color = Color.LightGray,
-                modifier = Modifier.padding(vertical = 16.dp)
-            )
+                // Botón de Agendar Veterinaria (deshabilitado por ahora)
+                FloatingActionButton(
+                    onClick = { /* Agendar Veterinaria - No habilitado */ },
+                    //enabled = false,
+                    containerColor = Color.Gray
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.MedicalServices,
+                        contentDescription = "Agendar Veterinaria",
+                        tint = Color.White.copy(alpha = 0.5f) // Ícono deshabilitado
+                    )
+                }
+
+                // Botón de Pasear (deshabilitado por ahora)
+                FloatingActionButton(
+                    onClick = { /* Pasear - No habilitado */ },
+                    //enabled = false,
+                    containerColor = Color.Gray
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.DirectionsWalk,
+                        contentDescription = "Pasear",
+                        tint = Color.White.copy(alpha = 0.5f)
+                    )
+                }
+
+                // Botón de Spa (deshabilitado por ahora)
+                FloatingActionButton(
+                    onClick = { /* Spa - No habilitado */ },
+                    //enabled = false,
+                    containerColor = Color.Gray
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Spa,
+                        contentDescription = "Spa",
+                        tint = Color.White.copy(alpha = 0.5f)
+                    )
+                }
+            }
         }
     }
 }

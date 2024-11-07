@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -66,6 +67,17 @@ fun MascotaScreen(
             .background(Color(0xFFF3F4F6))
             .padding(16.dp)
     ) {
+        // Botón de regreso al menú principal
+        IconButton(
+            onClick = { navController.navigate("InicioScreen") }, // Navega a InicioScreen
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver", tint = Color.Black)
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Título de la pantalla
         Text(
             text = "Gestión de Mascotas",
             fontSize = 24.sp,

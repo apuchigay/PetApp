@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
 import com.example.cuidadoanimal.Repository.AutenticacionRepository
-import com.example.cuidadoanimal.Repository.MascotaRepository // Asegúrate de importar el repositorio de mascotas
+import com.example.cuidadoanimal.Repository.MascotaRepository
 
 @Composable
 fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {

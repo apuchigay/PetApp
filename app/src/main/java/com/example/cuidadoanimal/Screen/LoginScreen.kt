@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +44,11 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2B303F))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFE76A68), Color(0xFFCF4E49))
+                )
+            )
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -72,7 +77,7 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
             onValueChange = { email = it },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -88,7 +93,7 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
             placeholder = { Text("Ingrese su contraseña") },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
         )
 
@@ -118,7 +123,10 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
                 }
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9F02))
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black
+            )
         ) {
             Text("Ingresar")
         }
@@ -130,7 +138,7 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
                 navController.popBackStack()
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A7AF2))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B))
         ) {
             Text("Volver", color = Color.White)
         }
@@ -142,3 +150,4 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
         }
     }
 }
+

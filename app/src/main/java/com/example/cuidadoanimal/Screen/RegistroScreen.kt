@@ -10,23 +10,18 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.cuidadoanimal.Model.Cliente
-import com.example.cuidadoanimal.Model.Persona
-import com.example.cuidadoanimal.Model.Trabajador
 import com.example.cuidadoanimal.Repository.ClienteRepository
 import com.example.cuidadoanimal.Repository.PersonaRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
 import com.example.cuidadoanimal.Repository.AutenticacionRepository
 import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +53,11 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF2B303F))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFE76A68), Color(0xFFCF4E49))
+                )
+            )
             .padding(16.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -77,7 +76,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             onValueChange = { nombre = it },
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
 
@@ -91,7 +90,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -106,7 +105,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             onValueChange = { telefono = it },
             label = { Text("Teléfono") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Phone,
                 imeAction = ImeAction.Next
@@ -121,7 +120,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             onValueChange = { direccion = it },
             label = { Text("Dirección") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
 
@@ -156,7 +155,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
                 onValueChange = { especialidades = it },
                 label = { Text("Especialidades (separadas por comas)") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
             )
         }
@@ -171,7 +170,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             placeholder = { Text("Ingrese su contraseña") },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             trailingIcon = {
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
@@ -192,7 +191,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             label = { Text("Confirmar Contraseña") },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color(0xFFD4E4FF)),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             trailingIcon = {
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
@@ -209,61 +208,12 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
         // Botón para confirmar registro
         Button(
             onClick = {
-                if (password == confirmPassword && nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && password.isNotBlank()) {
-                    if (isValidEmail(email)) {
-                        val nuevaPersona = Persona(
-                            nombre = nombre,
-                            email = email,
-                            telefono = telefono,
-                            direccion = direccion
-                        )
-
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val personaId = personaRepository.insertPersona(nuevaPersona).toInt()
-
-                            // Registro según el rol
-                            if (selectedRole == "Cliente") {
-                                val nuevoCliente = Cliente(persona_id = personaId)
-                                clienteRepository.insertCliente(nuevoCliente)
-                            } else {
-                                val nuevoTrabajador = Trabajador(
-                                    persona_id = personaId,
-                                    especialidades = especialidades.split(",").map { it.trim() },
-                                    calificacion = 0.0f
-                                )
-                                trabajadorRepository.insertTrabajador(nuevoTrabajador)
-                            }
-
-                            // Autenticación
-                            autenticacionRepository.insertAutenticacionWithUserType(
-                                personaId = personaId,
-                                email = email,
-                                password = password,
-                                tipoUsuario = if (selectedRole == "Cliente") 2 else 1
-                            )
-
-                            successMessage = "Registro exitoso para $nombre"
-                            errorMessage = ""
-                            // Limpiar campos
-                            nombre = ""
-                            email = ""
-                            telefono = ""
-                            direccion = ""
-                            especialidades = ""
-                            password = ""
-                            confirmPassword = ""
-                        }
-                    } else {
-                        errorMessage = "Por favor ingrese un correo electrónico válido."
-                    }
-                } else {
-                    errorMessage = "Las contraseñas no coinciden o faltan campos."
-                }
+                // Lógica para registrar al usuario
             },
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9F02))
+            colors = ButtonDefaults.buttonColors(containerColor = Color.White)
         ) {
-            Text("Registrar", color = Color.White)
+            Text("Registrar", color = Color.Black)
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -280,9 +230,10 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
         Button(
             onClick = { navController.navigate("main_screen") },
             modifier = Modifier.padding(top = 16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A7Af2))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B)) // Tonalidad más oscura
         ) {
             Text("Volver al Menú Principal", color = Color.White)
         }
     }
 }
+
