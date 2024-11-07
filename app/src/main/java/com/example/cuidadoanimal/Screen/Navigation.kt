@@ -1,6 +1,5 @@
 package com.example.cuidadoanimal.Screen
 
-import ClienteScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,25 +17,22 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
         composable("main_screen") {
             MainScreen(navController)
         }
-        composable("cliente_screen") {
-            ClienteScreen(navController, db)
-        }
-        composable("trabajador_screen") {
-            TrabajadorScreen(navController, db)
-        }
         composable("login_screen") {
             LoginScreen(navController, db)
         }
-        // Define la ruta de inicio_screen con un argumento userId
+        // Ruta para la pantalla de inicio con userId como argumento
         composable("inicio_screen/{userId}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
             InicioScreen(navController, userId, autenticacionRepository)
         }
-        // Definir la ruta de mascota_screen con clienteId como argumento
+        // Ruta para la pantalla de mascota con clienteId como argumento
         composable("mascota_screen/{clienteId}") { backStackEntry ->
             val clienteId = backStackEntry.arguments?.getString("clienteId")?.toIntOrNull() ?: 1
             MascotaScreen(navController, clienteId, mascotaRepository)
         }
+        // Ruta para la nueva pantalla de registro
+        composable("registro_screen") {
+            RegistroScreen(navController, db) // Ahora se pasa db en lugar de autenticacionRepository
+        }
     }
 }
-

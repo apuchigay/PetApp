@@ -64,7 +64,12 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation(libs.androidx.espresso.core)
+    implementation(libs.androidx.constraintlayout.compose.android)
+    implementation(libs.filament.android)
     ksp(libs.androidx.room.compiler)
+
+    implementation("androidx.compose.material:material-icons-extended:1.5.1")
 
     // Gson library
     implementation(libs.gson)
