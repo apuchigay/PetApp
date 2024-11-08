@@ -6,8 +6,11 @@ import com.example.cuidadoanimal.Model.HistorialMedico
 @Dao
 interface HistorialMedicoDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertHistorial(historial: HistorialMedico)
+    @Insert
+    suspend fun insert(historialMedico: HistorialMedico)
+
+    @Query("SELECT * FROM historial_medico WHERE mascota_id = :mascotaId")
+    suspend fun getHistorialByMascotaId(mascotaId: Int): List<HistorialMedico>
 
     @Update
     suspend fun updateHistorial(historial: HistorialMedico)
@@ -18,6 +21,4 @@ interface HistorialMedicoDao {
     @Query("SELECT * FROM historial_medico")
     suspend fun getAllHistoriales(): List<HistorialMedico>
 
-    @Query("SELECT * FROM historial_medico WHERE historialId = :id")
-    suspend fun getHistorialById(id: Int): HistorialMedico?
 }

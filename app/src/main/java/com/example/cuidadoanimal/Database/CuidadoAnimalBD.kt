@@ -22,7 +22,7 @@ import com.google.gson.Gson
         HistorialMedico::class,
         Autenticacion::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(CuidadoAnimalDatabase.Converters::class) // Registrar el TypeConverter
@@ -47,7 +47,10 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
                     context.applicationContext,
                     CuidadoAnimalDatabase::class.java,
                     "cuidado_animal_database"
-                ).build()
+                )
+                    // Agregar fallbackToDestructiveMigration()
+                    //.fallbackToDestructiveMigration() Descomentar solo para destruir la bd y construirla nuevamente en caso de cambios
+                    .build()
                 INSTANCE = instance
                 instance
             }
