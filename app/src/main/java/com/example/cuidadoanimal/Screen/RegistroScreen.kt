@@ -17,11 +17,17 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.cuidadoanimal.Model.Cliente
+import com.example.cuidadoanimal.Model.Persona
+import com.example.cuidadoanimal.Model.Trabajador
 import com.example.cuidadoanimal.Repository.ClienteRepository
 import com.example.cuidadoanimal.Repository.PersonaRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
 import com.example.cuidadoanimal.Repository.AutenticacionRepository
 import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -208,7 +214,52 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
         // Botón para confirmar registro
         Button(
             onClick = {
-                // Lógica para registrar al usuario
+                if (password == confirmPassword && nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && password.isNotBlank()) {
+                    if (isValidEmail(email)) {
+                        val nuevaPersona = Persona(
+                            nombre = nombre,
+                            email = email,
+                            telefono = telefono,
+                            direccion = direccion
+                        )
+                        CoroutineScope(Dispatchers.IO).launch {
+                            val personaId = personaRepository.insertPersona(nuevaPersona).toInt()
+                            // Registro según el rol
+                            if (selectedRole == "Cliente") {
+                                val nuevoCliente = Cliente(persona_id = personaId)
+                                clienteRepository.insertCliente(nuevoCliente)
+                            } else {
+                                val nuevoTrabajador = Trabajador(
+                                    persona_id = personaId,
+                                    especialidades = especialidades.split(",").map { it.trim() },
+                                    calificacion = 0.0f
+                                )
+                                trabajadorRepository.insertTrabajador(nuevoTrabajador)
+                            }
+                            // Autenticación
+                            autenticacionRepository.insertAutenticacionWithUserType(
+                                personaId = personaId,
+                                email = email,
+                                password = password,
+                                tipoUsuario = if (selectedRole == "Cliente") 2 else 1
+                            )
+                            successMessage = "Registro exitoso para $nombre"
+                            errorMessage = ""
+                            // Limpiar campos
+                            nombre = ""
+                            email = ""
+                            telefono = ""
+                            direccion = ""
+                            especialidades = ""
+                            password = ""
+                            confirmPassword = ""
+                        }
+                    } else {
+                        errorMessage = "Por favor ingrese un correo electrónico válido."
+                    }
+                } else {
+                    errorMessage = "Las contraseñas no coinciden o faltan campos."
+                }
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
@@ -230,7 +281,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
         Button(
             onClick = { navController.navigate("main_screen") },
             modifier = Modifier.padding(top = 16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B)) // Tonalidad más oscura
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B))
         ) {
             Text("Volver al Menú Principal", color = Color.White)
         }

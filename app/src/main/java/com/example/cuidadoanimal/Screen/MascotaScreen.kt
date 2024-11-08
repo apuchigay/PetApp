@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -13,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -139,16 +142,33 @@ fun MascotaScreen(
                     onClick = { deleteMascota() },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563))
                 ) {
-                    Text("Confirmar")
+                    Text("Confirmar", color = Color.White)
                 }
             },
             dismissButton = {
-                Button(onClick = { showConfirmDelete = false }) {
-                    Text("Cancelar")
+                Button(
+                    onClick = { showConfirmDelete = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B))
+                ) {
+                    Text("Cancelar", color = Color.White)
                 }
             },
-            title = { Text("Confirmación") },
-            text = { Text("¿Estás seguro de que deseas eliminar esta mascota?") }
+            title = {
+                Text(
+                    text = "Confirmación",
+                    color = Color.White,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "¿Estás seguro de que deseas eliminar esta mascota?",
+                    color = Color.White
+                )
+            },
+            containerColor = Color(0xFFC4C5C5), // Color de fondo del AlertDialog
+            titleContentColor = Color.White, // Color del título
+            textContentColor = Color.White // Color del texto
         )
     }
 }
@@ -187,6 +207,7 @@ fun MascotaItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MascotaDialog(
     onDismiss: () -> Unit,
@@ -216,28 +237,90 @@ fun MascotaDialog(
                     )
                     onSave(newMascota)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563)),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
             ) {
-                Text("Guardar")
+                Text("Guardar", color = Color.White)
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancelar")
+            Button(
+                onClick = onDismiss,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B)),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            ) {
+                Text("Cancelar", color = Color.White)
             }
         },
-        title = { Text(if (mascota == null) "Agregar Mascota" else "Editar Mascota") },
+        title = {
+            Text(
+                text = if (mascota == null) "Agregar Mascota" else "Editar Mascota",
+                fontSize = 20.sp,
+                color = Color.White,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        },
         text = {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.background(Color(0xFF9D9D9E))
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                TextField(value = nombre, onValueChange = { nombre = it }, label = { Text("Nombre") })
-                TextField(value = tipo, onValueChange = { tipo = it }, label = { Text("Tipo") })
-                TextField(value = edad, onValueChange = { edad = it }, label = { Text("Edad") })
-                TextField(value = raza, onValueChange = { raza = it }, label = { Text("Raza") })
-                TextField(value = peso, onValueChange = { peso = it }, label = { Text("Peso") })
+                TextField(
+                    value = nombre,
+                    onValueChange = { nombre = it },
+                    label = { Text("Nombre") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .background(Color.White),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                )
+                TextField(
+                    value = tipo,
+                    onValueChange = { tipo = it },
+                    label = { Text("Tipo") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .background(Color.White),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                )
+                TextField(
+                    value = edad,
+                    onValueChange = { edad = it },
+                    label = { Text("Edad") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .background(Color.White),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                )
+                TextField(
+                    value = raza,
+                    onValueChange = { raza = it },
+                    label = { Text("Raza") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .background(Color.White),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                )
+                TextField(
+                    value = peso,
+                    onValueChange = { peso = it },
+                    label = { Text("Peso") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
+                        .background(Color.White),
+                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                )
             }
-        }
+        },
+        containerColor = Color(0xFFC4C5C5) // Cambiado color de fondo del AlertDialog
     )
 }

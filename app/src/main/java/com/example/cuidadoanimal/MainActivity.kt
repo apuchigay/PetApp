@@ -14,9 +14,6 @@ class MainActivity : ComponentActivity() {
         // Nombre de la base de datos
         val databaseName = "cuidado_animal_database"
 
-        // Eliminar la base de datos al iniciar la aplicación
-        //applicationContext.deleteDatabase(databaseName)
-
         // Obtener una nueva instancia de la base de datos
         val database = CuidadoAnimalDatabase.getDatabase(applicationContext)
 
