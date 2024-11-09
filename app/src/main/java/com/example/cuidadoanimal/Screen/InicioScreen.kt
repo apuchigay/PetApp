@@ -104,8 +104,8 @@ fun InicioScreen(
                             icon = Icons.Outlined.MedicalServices,
                             label = "Agendar Veterinaria",
                             description = "Programa una cita",
-                            onClick = { /* Acción futura */ },
-                            isEnabled = false
+                            onClick = { navController.navigate("veterinaria_screen/$userId/$userId") },  // Aquí pasamos ambos parámetros
+                            isEnabled = true
                         )
                     }
 

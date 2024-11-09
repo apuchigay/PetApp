@@ -2,20 +2,27 @@ package com.example.cuidadoanimal.Screen
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.cuidadoanimal.Model.HistorialMedico
-import com.example.cuidadoanimal.Model.Trabajador
 import com.example.cuidadoanimal.Model.TrabajadorConNombre
 import com.example.cuidadoanimal.Repository.HistorialMedicoRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
@@ -27,14 +34,16 @@ import java.util.*
 fun VeterinariaScreen(
     navController: NavController,
     mascotaId: Int,
+    userId: Int,
     historialMedicoRepository: HistorialMedicoRepository,
     trabajadorRepository: TrabajadorRepository
 ) {
     val coroutineScope = rememberCoroutineScope()
     var trabajadores by remember { mutableStateOf<List<TrabajadorConNombre>>(emptyList()) }
     var selectedTrabajador by remember { mutableStateOf<TrabajadorConNombre?>(null) }
-    var fechaVisita by remember { mutableStateOf("") }
+    var fechaVisita by remember { mutableStateOf("Programar fecha") }
     var descripcion by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
 
     // Obtener lista de trabajadores al cargar la pantalla
     LaunchedEffect(Unit) {
@@ -59,6 +68,13 @@ fun VeterinariaScreen(
             .padding(16.dp)
             .background(Color(0xFFF3F4F6))
     ) {
+        IconButton(
+            onClick = { navController.popBackStack() },
+            modifier = Modifier.align(Alignment.Start)
+        ) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Volver")
+        }
+
         Text(
             "Agendar Visita Veterinaria",
             fontSize = 24.sp,
@@ -66,33 +82,59 @@ fun VeterinariaScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Selección del trabajador
         Text("Seleccionar Trabajador", fontSize = 16.sp, color = Color.Black)
-        ExposedDropdownMenuBox(
-            expanded = selectedTrabajador == null,
-            onExpandedChange = { },
-        ) {
+
+        Box(modifier = Modifier.fillMaxWidth()) {
             TextField(
                 value = selectedTrabajador?.nombre ?: "Seleccione un trabajador",
                 onValueChange = {},
                 readOnly = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded },
                 trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = selectedTrabajador == null)
-                },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White
-                )
-            )
-            ExposedDropdownMenu(
-                expanded = selectedTrabajador == null,
-                onDismissRequest = { /* Opcional: Ocultar menú al seleccionar */ }
-            ) {
-                trabajadores.forEach { trabajador ->
-                    DropdownMenuItem(
-                        text = { Text(trabajador.nombre) },
-                        onClick = { selectedTrabajador = trabajador }
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.clickable { expanded = !expanded }
                     )
+                },
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+            )
+        }
+
+        // "LargeDropMenu" estilo diálogo centrado debajo de "Seleccionar Trabajador"
+        if (expanded) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
+                    .shadow(8.dp, shape = RoundedCornerShape(12.dp))
+                    .padding(8.dp)
+                    .heightIn(max = 250.dp) // Limitar el tamaño máximo
+                    .offset(y = 8.dp) // Separar un poco del TextField
+            ) {
+                LazyColumn {
+                    items(trabajadores) { trabajador ->
+                        Column(modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedTrabajador = trabajador
+                                expanded = false
+                            }
+                            .padding(vertical = 8.dp, horizontal = 12.dp)
+                        ) {
+                            Text(
+                                text = trabajador.nombre,
+                                fontSize = 16.sp,
+                                color = Color.Black,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            )
+                            Divider(color = Color.Gray, thickness = 0.5.dp)
+                        }
+                    }
                 }
             }
         }
@@ -109,9 +151,7 @@ fun VeterinariaScreen(
                 .padding(vertical = 8.dp)
                 .clickable { datePickerDialog.show() },
             readOnly = true,
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White
-            )
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -124,9 +164,7 @@ fun VeterinariaScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White
-            ),
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
         )
 
@@ -144,7 +182,7 @@ fun VeterinariaScreen(
                             descripcion = descripcion
                         )
                         historialMedicoRepository.addHistorialMedico(historialMedico)
-                        navController.popBackStack() // Regresa a la pantalla anterior
+                        navController.popBackStack()
                     }
                 }
             },

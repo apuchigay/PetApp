@@ -14,7 +14,7 @@ interface TrabajadorDao {
     @Query("""
         SELECT 
             t.trabajadorId, 
-            t.persona_id AS personaId,  -- Usa alias para que coincida con TrabajadorConNombre
+            t.persona_id AS personaId,  -- Alias para que coincida con TrabajadorConNombre
             t.especialidades, 
             t.calificacion, 
             p.nombre
