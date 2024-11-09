@@ -1,17 +1,17 @@
 package com.example.cuidadoanimal.Screen
 
 import android.app.DatePickerDialog
+import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +28,10 @@ import com.example.cuidadoanimal.Repository.HistorialMedicoRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
 import kotlinx.coroutines.launch
 import java.util.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Popup
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,30 +48,27 @@ fun VeterinariaScreen(
     var fechaVisita by remember { mutableStateOf("Programar fecha") }
     var descripcion by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
 
     // Obtener lista de trabajadores al cargar la pantalla
     LaunchedEffect(Unit) {
         trabajadores = trabajadorRepository.getAllTrabajadoresWithNombre()
     }
 
-    // Configuración del DatePicker
-    val calendar = Calendar.getInstance()
-    val datePickerDialog = DatePickerDialog(
-        navController.context,
-        { _, year, month, day ->
-            fechaVisita = "$day/${month + 1}/$year"
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
+    // Función para convertir el valor de la fecha
+    val selectedDate = datePickerState.selectedDateMillis?.let {
+        convertMillisToDate(it)
+    } ?: ""
 
+    // Configuración de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .background(Color(0xFFF3F4F6))
     ) {
+        // Botón de regreso
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier.align(Alignment.Start)
@@ -82,77 +83,88 @@ fun VeterinariaScreen(
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
+        // Selección del trabajador utilizando DropdownMenu
         Text("Seleccionar Trabajador", fontSize = 16.sp, color = Color.Black)
-
         Box(modifier = Modifier.fillMaxWidth()) {
-            TextField(
+            OutlinedTextField(
                 value = selectedTrabajador?.nombre ?: "Seleccione un trabajador",
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded },
+                    .clickable { expanded = !expanded }
+                    .border(
+                        width = 1.dp,
+                        color = Color.Gray,
+                        shape = RoundedCornerShape(8.dp)
+                    ),
                 trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        modifier = Modifier.clickable { expanded = !expanded }
-                    )
+                    IconButton(onClick = { expanded = !expanded }) {
+                        Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
+                    }
                 },
                 colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
             )
-        }
 
-        // "LargeDropMenu" estilo diálogo centrado debajo de "Seleccionar Trabajador"
-        if (expanded) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .background(Color.White, shape = RoundedCornerShape(12.dp))
-                    .border(1.dp, Color.Gray, shape = RoundedCornerShape(12.dp))
-                    .shadow(8.dp, shape = RoundedCornerShape(12.dp))
-                    .padding(8.dp)
-                    .heightIn(max = 250.dp) // Limitar el tamaño máximo
-                    .offset(y = 8.dp) // Separar un poco del TextField
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
             ) {
-                LazyColumn {
-                    items(trabajadores) { trabajador ->
-                        Column(modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedTrabajador = trabajador
-                                expanded = false
-                            }
-                            .padding(vertical = 8.dp, horizontal = 12.dp)
-                        ) {
-                            Text(
-                                text = trabajador.nombre,
-                                fontSize = 16.sp,
-                                color = Color.Black,
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            )
-                            Divider(color = Color.Gray, thickness = 0.5.dp)
-                        }
-                    }
+                trabajadores.forEach { trabajador ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedTrabajador = trabajador
+                            expanded = false
+                        },
+                        text = { Text(trabajador.nombre) }
+                    )
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Selección de fecha
+        // Selección de fecha utilizando DatePicker
         Text("Fecha de la visita", fontSize = 16.sp, color = Color.Black)
-        TextField(
-            value = fechaVisita,
+        OutlinedTextField(
+            value = selectedDate,
             onValueChange = {},
+            label = { Text("Fecha de visita") },
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { showDatePicker = !showDatePicker }) {
+                    Icon(
+                        imageVector = Icons.Default.DateRange,
+                        contentDescription = "Seleccionar fecha"
+                    )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clickable { datePickerDialog.show() },
-            readOnly = true,
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                .height(64.dp)
         )
+
+        // Mostrar el DatePicker en un Popup
+        if (showDatePicker) {
+            Popup(
+                onDismissRequest = { showDatePicker = false },
+                alignment = Alignment.TopStart
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .offset(y = 64.dp)
+                        .shadow(elevation = 4.dp)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(16.dp)
+                ) {
+                    DatePicker(
+                        state = datePickerState,
+                        showModeToggle = false
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -163,7 +175,12 @@ fun VeterinariaScreen(
             onValueChange = { descripcion = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = 8.dp)
+                .border(
+                    width = 1.dp,
+                    color = Color.Gray,
+                    shape = RoundedCornerShape(8.dp)
+                ),
             colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
         )
@@ -178,7 +195,7 @@ fun VeterinariaScreen(
                         val historialMedico = HistorialMedico(
                             mascota_id = mascotaId,
                             trabajador_id = trabajador.trabajadorId,
-                            fecha_visita = fechaVisita,
+                            fecha_visita = selectedDate,
                             descripcion = descripcion
                         )
                         historialMedicoRepository.addHistorialMedico(historialMedico)
@@ -192,4 +209,10 @@ fun VeterinariaScreen(
             Text("Guardar", color = Color.White)
         }
     }
+}
+
+// Función de conversión de milisegundos a fecha
+fun convertMillisToDate(millis: Long): String {
+    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
 }
