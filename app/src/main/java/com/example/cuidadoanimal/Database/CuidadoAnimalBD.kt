@@ -20,14 +20,16 @@ import com.google.gson.Gson
         Servicio::class,
         SolicitudServicio::class,
         HistorialMedico::class,
-        Autenticacion::class
+        Autenticacion::class,
+        PaseoHistorial::class  // Asegúrate de que la entidad PaseoHistorial esté correctamente definida en el paquete Model
     ],
-    version = 3,
+    version = 4,  // Incrementar la versión de la base de datos al modificar entidades
     exportSchema = false
 )
-@TypeConverters(CuidadoAnimalDatabase.Converters::class) // Registrar el TypeConverter
+@TypeConverters(CuidadoAnimalDatabase.Converters::class)  // Registrar el TypeConverter para List<String>
 abstract class CuidadoAnimalDatabase : RoomDatabase() {
 
+    // Definición de los DAOs, incluyendo PaseoHistorialDao
     abstract fun personaDao(): PersonaDao
     abstract fun clienteDao(): ClienteDao
     abstract fun trabajadorDao(): TrabajadorDao
@@ -36,6 +38,7 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
     abstract fun solicitudServicioDao(): SolicitudServicioDao
     abstract fun historialMedicoDao(): HistorialMedicoDao
     abstract fun autenticacionDao(): AutenticacionDao
+    abstract fun paseoHistorialDao(): PaseoHistorialDao  // DAO para la entidad PaseoHistorial
 
     companion object {
         @Volatile
@@ -48,8 +51,7 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
                     CuidadoAnimalDatabase::class.java,
                     "cuidado_animal_database"
                 )
-                    // Agregar fallbackToDestructiveMigration()
-                    //.fallbackToDestructiveMigration() Descomentar solo para destruir la bd y construirla nuevamente en caso de cambios
+                    //.fallbackToDestructiveMigration()  // Descomentar si deseas reconstruir la BD en cambios destructivos
                     .build()
                 INSTANCE = instance
                 instance
@@ -57,18 +59,19 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
         }
     }
 
-    // Clase para manejar conversiones de listas a cadenas y viceversa
+    // TypeConverters para manejar conversiones de listas a JSON y viceversa
     class Converters {
+        private val gson = Gson()
 
         @TypeConverter
         fun fromString(value: String): List<String> {
             val listType = object : TypeToken<List<String>>() {}.type
-            return Gson().fromJson(value, listType)
+            return gson.fromJson(value, listType)
         }
 
         @TypeConverter
         fun fromList(list: List<String>): String {
-            return Gson().toJson(list)
+            return gson.toJson(list)
         }
     }
 }

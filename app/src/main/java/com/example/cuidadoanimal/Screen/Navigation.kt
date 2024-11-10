@@ -9,6 +9,7 @@ import com.example.cuidadoanimal.Repository.AutenticacionRepository
 import com.example.cuidadoanimal.Repository.HistorialMedicoRepository
 import com.example.cuidadoanimal.Repository.MascotaRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
+import com.example.cuidadoanimal.Repository.PaseoRepository
 
 @Composable
 fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
@@ -16,6 +17,7 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
     val mascotaRepository = MascotaRepository(db.mascotaDao())
     val historialMedicoRepository = HistorialMedicoRepository(db.historialMedicoDao())
     val trabajadorRepository = TrabajadorRepository(db.trabajadorDao())
+    val paseoRepository = PaseoRepository(db.paseoHistorialDao())
 
     NavHost(navController = navController, startDestination = "main_screen") {
         composable("main_screen") {
@@ -24,17 +26,15 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
         composable("login_screen") {
             LoginScreen(navController, db)
         }
-        // Ruta para la pantalla de inicio con userId como argumento
         composable("inicio_screen/{userId}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
-            InicioScreen(navController, userId, autenticacionRepository)
+            val mascotaId = backStackEntry.arguments?.getString("mascotaId")?.toIntOrNull() ?: 1
+            InicioScreen(navController, userId, mascotaId, autenticacionRepository)
         }
-        // Ruta para la pantalla de mascota con clienteId como argumento
         composable("mascota_screen/{clienteId}") { backStackEntry ->
             val clienteId = backStackEntry.arguments?.getString("clienteId")?.toIntOrNull() ?: 1
             MascotaScreen(navController, clienteId, mascotaRepository)
         }
-        // Ruta para la nueva pantalla de veterinaria con mascotaId como argumento
         composable("veterinaria_screen/{mascotaId}/{userId}") { backStackEntry ->
             val mascotaId = backStackEntry.arguments?.getString("mascotaId")?.toIntOrNull() ?: 1
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
@@ -46,7 +46,19 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
                 trabajadorRepository = trabajadorRepository
             )
         }
-        // Ruta para la nueva pantalla de registro
+        // Ruta para PaseoScreen
+        composable("paseo_screen/{mascotaId}/{userId}") { backStackEntry ->
+            val mascotaId = backStackEntry.arguments?.getString("mascotaId")?.toIntOrNull() ?: 1
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
+            PaseoScreen(
+                navController = navController,
+                mascotaId = mascotaId,
+                userId = userId,
+                paseoRepository = paseoRepository,
+                trabajadorRepository = trabajadorRepository,
+                mascotaRepository = mascotaRepository // Agregar mascotaRepository aquí
+            )
+        }
         composable("registro_screen") {
             RegistroScreen(navController, db)
         }

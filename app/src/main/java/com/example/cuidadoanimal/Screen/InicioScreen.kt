@@ -14,10 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,6 +31,7 @@ import kotlinx.coroutines.withContext
 fun InicioScreen(
     navController: NavHostController,
     userId: Int,
+    mascotaId: Int,
     autenticacionRepository: AutenticacionRepository
 ) {
     var welcomeMessage by remember { mutableStateOf("Cargando...") }
@@ -119,8 +118,10 @@ fun InicioScreen(
                             icon = Icons.Outlined.DirectionsWalk,
                             label = "Pasear",
                             description = "Programa un paseo",
-                            onClick = { /* Acción futura */ },
-                            isEnabled = false
+                            onClick = {
+                                navController.navigate("paseo_screen/$mascotaId/$userId") // Navegación a PaseoScreen con parámetros
+                            },
+                            isEnabled = true // Habilitamos el botón
                         )
 
                         OptionButton(
