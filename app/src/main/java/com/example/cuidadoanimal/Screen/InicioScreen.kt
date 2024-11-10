@@ -103,7 +103,7 @@ fun InicioScreen(
                             icon = Icons.Outlined.MedicalServices,
                             label = "Agendar Veterinaria",
                             description = "Programa una cita",
-                            onClick = { navController.navigate("veterinaria_screen/$userId/$userId") },  // Aquí pasamos ambos parámetros
+                            onClick = { navController.navigate("veterinaria_screen/$userId/$userId") },
                             isEnabled = true
                         )
                     }
@@ -119,17 +119,19 @@ fun InicioScreen(
                             label = "Pasear",
                             description = "Programa un paseo",
                             onClick = {
-                                navController.navigate("paseo_screen/$mascotaId/$userId") // Navegación a PaseoScreen con parámetros
+                                navController.navigate("paseo_screen/$mascotaId/$userId")
                             },
-                            isEnabled = true // Habilitamos el botón
+                            isEnabled = true
                         )
 
                         OptionButton(
                             icon = Icons.Outlined.Spa,
                             label = "Spa",
                             description = "Reserva un spa",
-                            onClick = { /* Acción futura */ },
-                            isEnabled = false
+                            onClick = {
+                                navController.navigate("spa_screen/$mascotaId/$userId")
+                            },
+                            isEnabled = true
                         )
                     }
                 }

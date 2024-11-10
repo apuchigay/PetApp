@@ -5,7 +5,6 @@ import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -15,28 +14,27 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.cuidadoanimal.Model.PaseoHistorial
 import com.example.cuidadoanimal.Model.Mascota
+import com.example.cuidadoanimal.Model.ServicioSpaHistorial
 import com.example.cuidadoanimal.Model.TrabajadorConNombre
 import com.example.cuidadoanimal.Repository.MascotaRepository
-import com.example.cuidadoanimal.Repository.PaseoRepository
+import com.example.cuidadoanimal.Repository.SpaRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
 import kotlinx.coroutines.launch
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaseoScreen(
+fun SpaScreen(
     navController: NavController,
     userId: Int,
     mascotaId: Int,
     mascotaRepository: MascotaRepository,
     trabajadorRepository: TrabajadorRepository,
-    paseoRepository: PaseoRepository
+    spaRepository: SpaRepository
 ) {
     val coroutineScope = rememberCoroutineScope()
     var trabajadores by remember { mutableStateOf<List<TrabajadorConNombre>>(emptyList()) }
@@ -45,29 +43,26 @@ fun PaseoScreen(
     var selectedMascota by remember { mutableStateOf<Mascota?>(null) }
     var selectedDate by remember { mutableStateOf("") }
     var selectedTime by remember { mutableStateOf("") }
-    var duracion by remember { mutableStateOf("15 minutos") }
+    var servicioSpa by remember { mutableStateOf("Baño Básico") }
     var instrucciones by remember { mutableStateOf("") }
     var trabajadorExpanded by remember { mutableStateOf(false) }
     var mascotaExpanded by remember { mutableStateOf(false) }
-    var showSuccessMessage by remember { mutableStateOf(false) }
+    var showMessage by remember { mutableStateOf(false) }
 
     val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-    // Cargar trabajadores y mascotas
     LaunchedEffect(Unit) {
         trabajadores = trabajadorRepository.getAllTrabajadoresWithNombre()
         mascotas = mascotaRepository.getMascotasByClienteId(userId)
     }
 
-    // UI principal
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .background(Color(0xFFF3F4F6))
     ) {
-        // Botón de regreso al menú principal
         IconButton(
             onClick = { navController.popBackStack() },
             modifier = Modifier.align(Alignment.Start)
@@ -76,13 +71,12 @@ fun PaseoScreen(
         }
 
         Text(
-            "Agendar Paseo para Mascota",
+            "Agendar Servicio de Spa para Mascota",
             fontSize = 24.sp,
             color = Color.Black,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Selección de Mascota
         Text("Seleccionar Mascota", fontSize = 16.sp, color = Color.Black)
         Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
@@ -118,11 +112,10 @@ fun PaseoScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Selección del paseador
-        Text("Seleccionar Paseador", fontSize = 16.sp, color = Color.Black)
+        Text("Seleccionar Trabajador", fontSize = 16.sp, color = Color.Black)
         Box(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
-                value = selectedTrabajador?.nombre ?: "Seleccione un paseador",
+                value = selectedTrabajador?.nombre ?: "Seleccione un trabajador",
                 onValueChange = {},
                 readOnly = true,
                 modifier = Modifier
@@ -154,8 +147,7 @@ fun PaseoScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Selección de fecha
-        Text("Fecha del paseo", fontSize = 16.sp, color = Color.Black)
+        Text("Fecha del Servicio", fontSize = 16.sp, color = Color.Black)
         OutlinedTextField(
             value = selectedDate,
             onValueChange = {},
@@ -181,8 +173,7 @@ fun PaseoScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Selección de hora
-        Text("Hora del paseo", fontSize = 16.sp, color = Color.Black)
+        Text("Hora del Servicio", fontSize = 16.sp, color = Color.Black)
         OutlinedTextField(
             value = selectedTime,
             onValueChange = {},
@@ -207,18 +198,15 @@ fun PaseoScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Duración del paseo
-        Text("Duración del paseo", fontSize = 16.sp, color = Color.Black)
+        Text("Servicio de Spa", fontSize = 16.sp, color = Color.Black)
         OutlinedTextField(
-            value = duracion,
-            onValueChange = { duracion = it },
-            modifier = Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
+            value = servicioSpa,
+            onValueChange = { servicioSpa = it },
+            modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Instrucciones especiales
         Text("Instrucciones Especiales", fontSize = 16.sp, color = Color.Black)
         TextField(
             value = instrucciones,
@@ -231,20 +219,20 @@ fun PaseoScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón para guardar la solicitud
         Button(
             onClick = {
                 coroutineScope.launch {
                     selectedTrabajador?.let { trabajador ->
-                        val paseoHistorial = PaseoHistorial(
+                        val servicioSpaHistorial = ServicioSpaHistorial(
                             mascota_id = selectedMascota?.mascotaId ?: 0,
                             trabajador_id = trabajador.trabajadorId,
-                            fecha_paseo = selectedDate,
-                            duracion = duracion.toIntOrNull() ?: 15,
+                            fecha_servicio = selectedDate,
+                            hora_servicio = selectedTime,
+                            servicio = servicioSpa,
                             instrucciones = instrucciones
                         )
-                        paseoRepository.addPaseo(paseoHistorial)
-                        showSuccessMessage = true
+                        spaRepository.addServicioSpa(servicioSpaHistorial)
+                        showMessage = true
                     }
                 }
             },
@@ -253,22 +241,15 @@ fun PaseoScreen(
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text("Guardar Paseo", color = Color.White)
+            Text("Guardar Servicio de Spa", color = Color.White)
         }
 
-        if (showSuccessMessage) {
-            AlertDialog(
-                onDismissRequest = { showSuccessMessage = false },
-                title = { Text("Paseo registrado") },
-                text = { Text("El paseo ha sido registrado con éxito.") },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showSuccessMessage = false
-                        navController.popBackStack()
-                    }) {
-                        Text("Aceptar")
-                    }
-                }
+        if (showMessage) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Servicio de Spa guardado exitosamente.",
+                color = Color.Green,
+                fontSize = 16.sp
             )
         }
     }

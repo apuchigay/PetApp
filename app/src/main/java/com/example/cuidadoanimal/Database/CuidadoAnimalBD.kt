@@ -21,15 +21,16 @@ import com.google.gson.Gson
         SolicitudServicio::class,
         HistorialMedico::class,
         Autenticacion::class,
-        PaseoHistorial::class  // Asegúrate de que la entidad PaseoHistorial esté correctamente definida en el paquete Model
+        PaseoHistorial::class,    // Entidad para el historial de paseos
+        ServicioSpaHistorial::class // Nueva entidad para el historial de servicios de spa
     ],
-    version = 4,  // Incrementar la versión de la base de datos al modificar entidades
+    version = 5,  // Incrementar la versión debido a la nueva entidad
     exportSchema = false
 )
 @TypeConverters(CuidadoAnimalDatabase.Converters::class)  // Registrar el TypeConverter para List<String>
 abstract class CuidadoAnimalDatabase : RoomDatabase() {
 
-    // Definición de los DAOs, incluyendo PaseoHistorialDao
+    // Definición de los DAOs
     abstract fun personaDao(): PersonaDao
     abstract fun clienteDao(): ClienteDao
     abstract fun trabajadorDao(): TrabajadorDao
@@ -38,7 +39,8 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
     abstract fun solicitudServicioDao(): SolicitudServicioDao
     abstract fun historialMedicoDao(): HistorialMedicoDao
     abstract fun autenticacionDao(): AutenticacionDao
-    abstract fun paseoHistorialDao(): PaseoHistorialDao  // DAO para la entidad PaseoHistorial
+    abstract fun paseoHistorialDao(): PaseoHistorialDao   // DAO para la entidad PaseoHistorial
+    abstract fun spaDao(): SpaDao                // Nuevo DAO para la entidad ServicioSpaHistorial
 
     companion object {
         @Volatile

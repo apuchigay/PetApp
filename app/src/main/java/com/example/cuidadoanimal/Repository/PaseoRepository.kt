@@ -1,8 +1,7 @@
 package com.example.cuidadoanimal.Repository
 
 import com.example.cuidadoanimal.Model.PaseoHistorial
-import com.example.cuidadoanimal.DAO.*
-import com.example.cuidadoanimal.Database.PaseoHistorialDao
+import com.example.cuidadoanimal.DAO.PaseoHistorialDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 

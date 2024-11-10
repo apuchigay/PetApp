@@ -1,4 +1,4 @@
-package com.example.cuidadoanimal.Database
+package com.example.cuidadoanimal.DAO
 
 import androidx.room.Dao
 import androidx.room.Insert

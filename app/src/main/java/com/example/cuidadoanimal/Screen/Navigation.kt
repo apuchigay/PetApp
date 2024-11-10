@@ -5,11 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
-import com.example.cuidadoanimal.Repository.AutenticacionRepository
-import com.example.cuidadoanimal.Repository.HistorialMedicoRepository
-import com.example.cuidadoanimal.Repository.MascotaRepository
-import com.example.cuidadoanimal.Repository.TrabajadorRepository
-import com.example.cuidadoanimal.Repository.PaseoRepository
+import com.example.cuidadoanimal.Repository.*
 
 @Composable
 fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
@@ -18,6 +14,7 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
     val historialMedicoRepository = HistorialMedicoRepository(db.historialMedicoDao())
     val trabajadorRepository = TrabajadorRepository(db.trabajadorDao())
     val paseoRepository = PaseoRepository(db.paseoHistorialDao())
+    val spaRepository = SpaRepository(db.spaDao()) // Nueva instancia de SpaRepository
 
     NavHost(navController = navController, startDestination = "main_screen") {
         composable("main_screen") {
@@ -46,7 +43,6 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
                 trabajadorRepository = trabajadorRepository
             )
         }
-        // Ruta para PaseoScreen
         composable("paseo_screen/{mascotaId}/{userId}") { backStackEntry ->
             val mascotaId = backStackEntry.arguments?.getString("mascotaId")?.toIntOrNull() ?: 1
             val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
@@ -56,7 +52,19 @@ fun Navigation(navController: NavHostController, db: CuidadoAnimalDatabase) {
                 userId = userId,
                 paseoRepository = paseoRepository,
                 trabajadorRepository = trabajadorRepository,
-                mascotaRepository = mascotaRepository // Agregar mascotaRepository aquí
+                mascotaRepository = mascotaRepository
+            )
+        }
+        composable("spa_screen/{mascotaId}/{userId}") { backStackEntry ->
+            val mascotaId = backStackEntry.arguments?.getString("mascotaId")?.toIntOrNull() ?: 1
+            val userId = backStackEntry.arguments?.getString("userId")?.toIntOrNull() ?: 1
+            SpaScreen(
+                navController = navController,
+                mascotaId = mascotaId,
+                userId = userId,
+                spaRepository = spaRepository,
+                trabajadorRepository = trabajadorRepository,
+                mascotaRepository = mascotaRepository
             )
         }
         composable("registro_screen") {
