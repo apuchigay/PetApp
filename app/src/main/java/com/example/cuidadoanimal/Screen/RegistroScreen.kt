@@ -2,6 +2,7 @@ package com.example.cuidadoanimal.Screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -44,13 +45,11 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
     var errorMessage by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("Cliente") }
 
-    // Crear instancias de los repositorios
     val clienteRepository = ClienteRepository(db.clienteDao())
     val trabajadorRepository = TrabajadorRepository(db.trabajadorDao())
     val personaRepository = PersonaRepository(db.personaDao())
     val autenticacionRepository = AutenticacionRepository(db.autenticacionDao(), db.personaDao())
 
-    // Función para validar el correo electrónico
     fun isValidEmail(email: String): Boolean {
         val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
         return email.matches(emailPattern)
@@ -76,99 +75,123 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        // Campo de nombre
         TextField(
             value = nombre,
             onValueChange = { nombre = it },
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo de correo electrónico con validación
         TextField(
             value = email,
-            onValueChange = {
-                email = it
-            },
+            onValueChange = { email = it },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo de teléfono
         TextField(
             value = telefono,
             onValueChange = { telefono = it },
             label = { Text("Teléfono") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Phone,
                 imeAction = ImeAction.Next
             )
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo de dirección
         TextField(
             value = direccion,
             onValueChange = { direccion = it },
             label = { Text("Dirección") },
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Selección de rol
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            RadioButton(
-                selected = selectedRole == "Cliente",
-                onClick = { selectedRole = "Cliente" }
-            )
-            Text("Cliente", color = Color.White, modifier = Modifier.padding(start = 8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = selectedRole == "Cliente",
+                    onClick = { selectedRole = "Cliente" }
+                )
+                Text("Cliente", color = Color.White)
+            }
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            RadioButton(
-                selected = selectedRole == "Trabajador",
-                onClick = { selectedRole = "Trabajador" }
-            )
-            Text("Trabajador", color = Color.White, modifier = Modifier.padding(start = 8.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = selectedRole == "Trabajador",
+                    onClick = { selectedRole = "Trabajador" }
+                )
+                Text("Trabajador", color = Color.White)
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo de especialidades (solo para trabajador)
         if (selectedRole == "Trabajador") {
             TextField(
                 value = especialidades,
                 onValueChange = { especialidades = it },
                 label = { Text("Especialidades (separadas por comas)") },
                 modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(25.dp),
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo de contraseña
         TextField(
             value = password,
             onValueChange = { password = it },
@@ -176,7 +199,12 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             placeholder = { Text("Ingrese su contraseña") },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
             trailingIcon = {
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
@@ -188,16 +216,20 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Campo de confirmar contraseña
         TextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
             label = { Text("Confirmar Contraseña") },
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             trailingIcon = {
                 IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
@@ -211,7 +243,6 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Botón para confirmar registro
         Button(
             onClick = {
                 if (password == confirmPassword && nombre.isNotBlank() && email.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank() && password.isNotBlank()) {
@@ -267,9 +298,8 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             Text("Registrar", color = Color.Black)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        // Mensajes de éxito o error
         if (successMessage.isNotEmpty()) {
             Text(text = successMessage, color = Color.Green)
         }
@@ -277,14 +307,12 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             Text(text = errorMessage, color = Color.Red)
         }
 
-        // Botón para regresar al menú principal
         Button(
             onClick = { navController.navigate("main_screen") },
-            modifier = Modifier.padding(top = 16.dp),
+            modifier = Modifier.padding(top = 12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6A6A6B))
         ) {
             Text("Volver al Menú Principal", color = Color.White)
         }
     }
 }
-

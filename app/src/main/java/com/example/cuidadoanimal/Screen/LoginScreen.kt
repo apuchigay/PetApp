@@ -24,6 +24,7 @@ import com.example.cuidadoanimal.Repository.AutenticacionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,9 +66,9 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
 
         // Imagen de logo
         Image(
-            painter = painterResource(id = R.drawable.login), // Reemplaza con el nombre correcto de tu imagen
+            painter = painterResource(id = R.drawable.login),
             contentDescription = "Logo de Cuidado Animal",
-            modifier = Modifier.size(220.dp)
+            modifier = Modifier.size(180.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -76,8 +77,16 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
             value = email,
             onValueChange = { email = it },
             label = { Text("Correo electrónico") },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(25.dp)),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
@@ -92,8 +101,16 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
             label = { Text("Contraseña") },
             placeholder = { Text("Ingrese su contraseña") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(25.dp)),
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done)
         )
 
@@ -107,13 +124,11 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
                         autenticacionRepository.verifyPassword(email, password)
                     }
                     if (isValidUser) {
-                        // Obtener el usuario para redirigir a inicio_screen
                         val autenticacion = withContext(Dispatchers.IO) {
                             autenticacionRepository.getAutenticacionByEmail(email)
                         }
                         if (autenticacion != null) {
-                            // Redirigir a inicio_screen pasando el id de usuario
-                            navController.navigate("inicio_screen/${autenticacion.persona_id}") // Asegúrate de pasar el id de persona
+                            navController.navigate("inicio_screen/${autenticacion.persona_id}")
                         } else {
                             errorMessage = "Usuario no encontrado"
                         }
@@ -150,4 +165,3 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
         }
     }
 }
-
