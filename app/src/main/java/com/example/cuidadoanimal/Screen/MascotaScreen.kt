@@ -1,6 +1,8 @@
 package com.example.cuidadoanimal.Screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -156,19 +158,18 @@ fun MascotaScreen(
             title = {
                 Text(
                     text = "Confirmación",
-                    color = Color.White,
+                    color = Color.Black,
                     fontSize = 20.sp
                 )
             },
             text = {
                 Text(
                     text = "¿Estás seguro de que deseas eliminar esta mascota?",
-                    color = Color.White
+                    color = Color.Black
                 )
             },
-            containerColor = Color(0xFFC4C5C5), // Color de fondo del AlertDialog
-            titleContentColor = Color.White, // Color del título
-            textContentColor = Color.White // Color del texto
+            containerColor = Color.White, // Fondo blanco
+            shape = RoundedCornerShape(25.dp)
         )
     }
 }
@@ -182,7 +183,8 @@ fun MascotaItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .background(Color.White, shape = RoundedCornerShape(25.dp)), // Bordes redondeados
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
@@ -194,6 +196,8 @@ fun MascotaItem(
                 Text(text = "Nombre: ${mascota.nombre}", fontSize = 16.sp, color = Color.Black)
                 Text(text = "Tipo: ${mascota.tipo}", fontSize = 14.sp, color = Color.Gray)
                 Text(text = "Edad: ${mascota.edad}", fontSize = 14.sp, color = Color.Gray)
+                Text(text = "Raza: ${mascota.raza}", fontSize = 14.sp, color = Color.Gray) // Nueva línea para raza
+                Text(text = "Peso: ${mascota.peso} kg", fontSize = 14.sp, color = Color.Gray) // Nueva línea para peso
             }
             Row {
                 IconButton(onClick = onEdit) {
@@ -254,9 +258,9 @@ fun MascotaDialog(
         },
         title = {
             Text(
-                text = if (mascota == null) "Agregar Mascota" else "Editar Mascota",
+                text = if (mascota == null) "Añadir Mascota" else "Editar Mascota",
                 fontSize = 20.sp,
-                color = Color.White,
+                color = Color.Black, // Texto negro para visibilidad
                 modifier = Modifier.padding(bottom = 8.dp)
             )
         },
@@ -274,8 +278,12 @@ fun MascotaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .background(Color.White),
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)), // Radio de 25.dp en el borde
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        unfocusedIndicatorColor = Color.Transparent, // Línea eliminada
+                        focusedIndicatorColor = Color.Transparent // Línea eliminada
+                    )
                 )
                 TextField(
                     value = tipo,
@@ -284,8 +292,12 @@ fun MascotaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .background(Color.White),
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
                 )
                 TextField(
                     value = edad,
@@ -295,8 +307,12 @@ fun MascotaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .background(Color.White),
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
                 )
                 TextField(
                     value = raza,
@@ -305,8 +321,12 @@ fun MascotaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .background(Color.White),
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
                 )
                 TextField(
                     value = peso,
@@ -316,11 +336,15 @@ fun MascotaDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
-                        .background(Color.White),
-                    colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                        .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent
+                    )
                 )
             }
         },
-        containerColor = Color(0xFFC4C5C5) // Cambiado color de fondo del AlertDialog
+        containerColor = Color.White // Fondo blanco para el formulario
     )
 }

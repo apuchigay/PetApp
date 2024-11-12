@@ -1,7 +1,6 @@
 package com.example.cuidadoanimal.Screen
 
 import android.app.DatePickerDialog
-import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,7 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -28,10 +27,6 @@ import com.example.cuidadoanimal.Repository.HistorialMedicoRepository
 import com.example.cuidadoanimal.Repository.TrabajadorRepository
 import kotlinx.coroutines.launch
 import java.util.*
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.window.Popup
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,11 +40,10 @@ fun VeterinariaScreen(
     val coroutineScope = rememberCoroutineScope()
     var trabajadores by remember { mutableStateOf<List<TrabajadorConNombre>>(emptyList()) }
     var selectedTrabajador by remember { mutableStateOf<TrabajadorConNombre?>(null) }
-    var fechaVisita by remember { mutableStateOf("Programar fecha") }
-    var descripcion by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState = rememberDatePickerState()
+    var descripcion by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf("") }
+    val calendar = Calendar.getInstance()
 
     // Obtener lista de trabajadores al cargar la pantalla
     LaunchedEffect(Unit) {
@@ -57,16 +51,13 @@ fun VeterinariaScreen(
     }
 
     // Función para convertir el valor de la fecha
-    val selectedDate = datePickerState.selectedDateMillis?.let {
-        convertMillisToDate(it)
-    } ?: ""
+    val currentDate = calendar.time.toString()
 
-    // Configuración de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
             .background(Color(0xFFF3F4F6))
+            .padding(16.dp)
     ) {
         // Botón de regreso
         IconButton(
@@ -92,23 +83,30 @@ fun VeterinariaScreen(
                 readOnly = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .border(
-                        width = 1.dp,
-                        color = Color.Gray,
-                        shape = RoundedCornerShape(8.dp)
-                    ),
+                    .clickable { expanded = !expanded },
                 trailingIcon = {
                     IconButton(onClick = { expanded = !expanded }) {
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                     }
                 },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    containerColor = Color.White,
+                    unfocusedBorderColor = Color.Gray,
+                    focusedBorderColor = Color.Gray,
+                    cursorColor = Color.Black
+                ),
+                shape = RoundedCornerShape(25.dp)
             )
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .fillMaxWidth() // Asegura que ocupe el ancho completo
+                    .clip(RoundedCornerShape(25.dp)) // Bordes redondeados
+                    .background(Color.White, shape = RoundedCornerShape(25.dp)) // Fondo blanco
+                    .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)) // Borde gris redondeado
+                    .heightIn(max = 120.dp) // Reducir tamaño del listado
             ) {
                 trabajadores.forEach { trabajador ->
                     DropdownMenuItem(
@@ -124,64 +122,53 @@ fun VeterinariaScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Selección de fecha utilizando DatePicker
+        // Selección de la fecha utilizando DatePickerDialog
         Text("Fecha de la visita", fontSize = 16.sp, color = Color.Black)
         OutlinedTextField(
             value = selectedDate,
             onValueChange = {},
-            label = { Text("Fecha de visita") },
             readOnly = true,
             trailingIcon = {
-                IconButton(onClick = { showDatePicker = !showDatePicker }) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "Seleccionar fecha"
-                    )
+                IconButton(onClick = {
+                    DatePickerDialog(
+                        navController.context,
+                        { _, year, month, dayOfMonth ->
+                            selectedDate = "$dayOfMonth/${month + 1}/$year"
+                        },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)
+                    ).show()
+                }) {
+                    Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(64.dp)
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                containerColor = Color.White,
+                unfocusedBorderColor = Color.Gray,
+                focusedBorderColor = Color.Gray
+            ),
+            shape = RoundedCornerShape(25.dp)
         )
-
-        // Mostrar el DatePicker en un Popup
-        if (showDatePicker) {
-            Popup(
-                onDismissRequest = { showDatePicker = false },
-                alignment = Alignment.TopStart
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = 64.dp)
-                        .shadow(elevation = 4.dp)
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(16.dp)
-                ) {
-                    DatePicker(
-                        state = datePickerState,
-                        showModeToggle = false
-                    )
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Descripción de la visita
         Text("Descripción", fontSize = 16.sp, color = Color.Black)
-        TextField(
+        OutlinedTextField(
             value = descripcion,
             onValueChange = { descripcion = it },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
-                .border(
-                    width = 1.dp,
-                    color = Color.Gray,
-                    shape = RoundedCornerShape(8.dp)
-                ),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+                .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)), // Borde con redondeado
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                unfocusedBorderColor = Color.Transparent,
+                focusedBorderColor = Color.Transparent,
+                containerColor = Color.White
+            ),
+            shape = RoundedCornerShape(25.dp),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
         )
 
@@ -204,15 +191,11 @@ fun VeterinariaScreen(
                 }
             },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563)),
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         ) {
             Text("Guardar", color = Color.White)
         }
     }
-}
-
-// Función de conversión de milisegundos a fecha
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
 }
