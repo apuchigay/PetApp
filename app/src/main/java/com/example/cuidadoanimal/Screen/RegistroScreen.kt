@@ -29,6 +29,7 @@ import com.example.cuidadoanimal.Database.CuidadoAnimalDatabase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +42,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var isPasswordVisible by remember { mutableStateOf(false) }
-    var successMessage by remember { mutableStateOf("") }
+    var successDialogVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
     var selectedRole by remember { mutableStateOf("Cliente") }
 
@@ -96,6 +97,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             onValueChange = { email = it },
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
+            isError = !isValidEmail(email) && email.isNotEmpty(),  // Mostrar error si el correo no es válido
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.White,
                 focusedIndicatorColor = Color.Transparent,
@@ -107,6 +109,14 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
                 imeAction = ImeAction.Next
             )
         )
+
+        if (!isValidEmail(email) && email.isNotEmpty()) {
+            Text(
+                text = "Por favor ingrese un correo electrónico válido.",
+                color = Color.White,
+                fontSize = 16.sp
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -255,6 +265,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
                         )
                         CoroutineScope(Dispatchers.IO).launch {
                             val personaId = personaRepository.insertPersona(nuevaPersona).toInt()
+                            successDialogVisible = true  // Mostrar diálogo de éxito
                             // Registro según el rol
                             if (selectedRole == "Cliente") {
                                 val nuevoCliente = Cliente(persona_id = personaId)
@@ -274,7 +285,6 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
                                 password = password,
                                 tipoUsuario = if (selectedRole == "Cliente") 2 else 1
                             )
-                            successMessage = "Registro exitoso para $nombre"
                             errorMessage = ""
                             // Limpiar campos
                             nombre = ""
@@ -298,14 +308,39 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             Text("Registrar", color = Color.Black)
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        if (successDialogVisible) {
+            AlertDialog(
+                onDismissRequest = { successDialogVisible = false },
+                title = {
+                    Text(
+                        text = "Registro exitoso",
+                        color = Color.Black,
+                        fontSize = 20.sp
+                    )
+                },
+                text = {
+                    Text(
+                        text = "El usuario $nombre ha sido registrado correctamente.",
+                        color = Color.Black
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            successDialogVisible = false
+                            navController.navigate("main_screen")  // Navegar a la pantalla principal
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563))
+                    ) {
+                        Text("Aceptar", color = Color.White)
+                    }
+                },
+                containerColor = Color.White, // Fondo blanco
+                shape = RoundedCornerShape(25.dp)
+            )
+        }
 
-        if (successMessage.isNotEmpty()) {
-            Text(text = successMessage, color = Color.Green)
-        }
-        if (errorMessage.isNotEmpty()) {
-            Text(text = errorMessage, color = Color.Red)
-        }
+        Spacer(modifier = Modifier.height(12.dp))
 
         Button(
             onClick = { navController.navigate("main_screen") },
