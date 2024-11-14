@@ -43,6 +43,7 @@ fun VeterinariaScreen(
     var expanded by remember { mutableStateOf(false) }
     var descripcion by remember { mutableStateOf("") }
     var selectedDate by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) } // Estado para el AlertDialog
     val calendar = Calendar.getInstance()
 
     // Obtener lista de trabajadores al cargar la pantalla
@@ -102,11 +103,11 @@ fun VeterinariaScreen(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .fillMaxWidth() // Asegura que ocupe el ancho completo
-                    .clip(RoundedCornerShape(25.dp)) // Bordes redondeados
-                    .background(Color.White, shape = RoundedCornerShape(25.dp)) // Fondo blanco
-                    .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)) // Borde gris redondeado
-                    .heightIn(max = 120.dp) // Reducir tamaño del listado
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(25.dp))
+                    .background(Color.White, shape = RoundedCornerShape(25.dp))
+                    .border(1.dp, Color.Gray, RoundedCornerShape(25.dp))
+                    .heightIn(max = 120.dp)
             ) {
                 trabajadores.forEach { trabajador ->
                     DropdownMenuItem(
@@ -138,7 +139,9 @@ fun VeterinariaScreen(
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
+                    ).apply {
+                        datePicker.minDate = calendar.timeInMillis // Restringe a fechas futuras
+                    }.show()
                 }) {
                     Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
                 }
@@ -162,7 +165,7 @@ fun VeterinariaScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
-                .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)), // Borde con redondeado
+                .border(1.dp, Color.Gray, RoundedCornerShape(25.dp)),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 unfocusedBorderColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
@@ -186,7 +189,7 @@ fun VeterinariaScreen(
                             descripcion = descripcion
                         )
                         historialMedicoRepository.addHistorialMedico(historialMedico)
-                        navController.popBackStack()
+                        showDialog = true // Mostrar diálogo al guardar
                     }
                 }
             },
@@ -197,5 +200,41 @@ fun VeterinariaScreen(
         ) {
             Text("Guardar", color = Color.White)
         }
+    }
+
+    // Diálogo de confirmación
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog = false
+                        selectedTrabajador = null // Limpiar selección del trabajador
+                        selectedDate = ""         // Limpiar fecha seleccionada
+                        descripcion = ""          // Limpiar descripción
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE26563)),
+                    modifier = Modifier.fillMaxWidth() // Para centrar el botón en toda la fila
+                ) {
+                    Text("Aceptar", color = Color.White)
+                }
+            },
+            title = {
+                Text(
+                    text = "Registro Exitoso",
+                    color = Color.Black,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Text(
+                    text = "La visita veterinaria ha sido registrada correctamente.",
+                    color = Color.Black
+                )
+            },
+            containerColor = Color.White, // Fondo blanco
+            shape = RoundedCornerShape(25.dp) // Esquinas redondeadas
+        )
     }
 }
