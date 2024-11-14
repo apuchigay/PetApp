@@ -25,6 +25,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.VisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,6 +36,8 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }  // Estado para el icono de ojo
+    var emailError by remember { mutableStateOf(false) }  // Estado para la validación de correo
 
     // Crear una instancia del repositorio de autenticación con ambos DAOs
     val autenticacionRepository = AutenticacionRepository(
@@ -73,10 +79,15 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de correo electrónico con validación
         TextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                emailError = !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+            },
             label = { Text("Correo electrónico") },
+            isError = emailError,
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White, RoundedCornerShape(25.dp)),
@@ -93,14 +104,32 @@ fun LoginScreen(navController: NavHostController, db: CuidadoAnimalDatabase) {
             )
         )
 
+        if (emailError) {
+            Text(
+                text = "Por favor ingrese un correo electrónico válido",
+                color = Color.White,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
+        // Campo de contraseña con icono de ojo para mostrar/ocultar
         TextField(
             value = password,
             onValueChange = { password = it },
             label = { Text("Contraseña") },
             placeholder = { Text("Ingrese su contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                    )
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White, RoundedCornerShape(25.dp)),
