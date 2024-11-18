@@ -53,7 +53,7 @@ abstract class CuidadoAnimalDatabase : RoomDatabase() {
                     CuidadoAnimalDatabase::class.java,
                     "cuidado_animal_database"
                 )
-                    //.fallbackToDestructiveMigration()  // Descomentar si deseas reconstruir la BD en cambios destructivos
+                  //  .fallbackToDestructiveMigration()  // Descomentar si deseas reconstruir la BD en cambios destructivos
                     .build()
                 INSTANCE = instance
                 instance

@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -97,6 +98,7 @@ fun PaseoScreen(
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                     }
                 },
+                shape = RoundedCornerShape(16.dp), // Bordes redondeados
                 colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
             )
 
@@ -133,6 +135,7 @@ fun PaseoScreen(
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                     }
                 },
+                shape = RoundedCornerShape(16.dp), // Bordes redondeados
                 colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
             )
 
@@ -171,11 +174,14 @@ fun PaseoScreen(
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
+                    ).apply {
+                        datePicker.minDate = System.currentTimeMillis() // Restringir fechas pasadas
+                    }.show()
                 }) {
                     Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
                 }
             },
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -202,6 +208,7 @@ fun PaseoScreen(
                     Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar hora")
                 }
             },
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -212,6 +219,7 @@ fun PaseoScreen(
         OutlinedTextField(
             value = duracion,
             onValueChange = { duracion = it },
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number)
         )
@@ -223,6 +231,7 @@ fun PaseoScreen(
         TextField(
             value = instrucciones,
             onValueChange = { instrucciones = it },
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),

@@ -1,10 +1,12 @@
 package com.example.cuidadoanimal.Screen
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.DirectionsWalk
 import androidx.compose.material.icons.outlined.MedicalServices
 import androidx.compose.material.icons.outlined.Pets
@@ -16,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.cuidadoanimal.R
 import com.example.cuidadoanimal.Repository.AutenticacionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -36,8 +40,9 @@ fun InicioScreen(
 ) {
     var welcomeMessage by remember { mutableStateOf("Cargando...") }
     var tipoUsuario by remember { mutableStateOf<Int?>(null) }
+    var showDialog by remember { mutableStateOf(false) } // Controlador para el cuadro de diálogo
 
-    // Obtener datos del usuario y el rol
+    // Obtener datos del usuario y su rol
     LaunchedEffect(userId) {
         val (autenticacion, persona) = withContext(Dispatchers.IO) {
             autenticacionRepository.getUserWithDetailsById(userId)
@@ -49,11 +54,11 @@ fun InicioScreen(
         }
     }
 
-    // Fondo sólido blanco
+    // Fondo sólido rojo clarito
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(Color(0xFFFFEBEE))
             .padding(16.dp)
     ) {
         Column(
@@ -62,6 +67,7 @@ fun InicioScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
             // Mensaje de bienvenida
             Text(
                 text = welcomeMessage,
@@ -69,8 +75,17 @@ fun InicioScreen(
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
                 modifier = Modifier
-                    .padding(top = 48.dp, bottom = 24.dp) // Separación adicional en la parte superior
+                    .padding(top = 48.dp, bottom = 24.dp)
                     .align(Alignment.CenterHorizontally)
+            )
+
+            // Imagen en la parte superior
+            Image(
+                painter = painterResource(id = R.drawable.bienvenido),
+                contentDescription = "Logo",
+                modifier = Modifier
+                    .size(228.dp)
+                    .padding(top = 16.dp)
             )
 
             // Contenedor para los botones de opciones
@@ -85,7 +100,7 @@ fun InicioScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Primera fila de botones
+                    // Opciones comunes para ambos roles
                     Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically,
@@ -98,7 +113,6 @@ fun InicioScreen(
                             onClick = { navController.navigate("mascota_screen/$userId") },
                             isEnabled = true
                         )
-
                         OptionButton(
                             icon = Icons.Outlined.MedicalServices,
                             label = "Agendar Veterinaria",
@@ -107,8 +121,6 @@ fun InicioScreen(
                             isEnabled = true
                         )
                     }
-
-                    // Segunda fila de botones
                     Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically,
@@ -123,7 +135,6 @@ fun InicioScreen(
                             },
                             isEnabled = true
                         )
-
                         OptionButton(
                             icon = Icons.Outlined.Spa,
                             label = "Spa",
@@ -133,6 +144,23 @@ fun InicioScreen(
                             },
                             isEnabled = true
                         )
+                    }
+
+                    // Botón adicional para trabajadores
+                    if (tipoUsuario == 1) { // Si es trabajador
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceEvenly,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            OptionButton(
+                                icon = Icons.Outlined.Analytics,
+                                label = "Informe General",
+                                description = "Consulta estadísticas generales",
+                                onClick = { showDialog = true }, // Muestra el diálogo
+                                isEnabled = true
+                            )
+                        }
                     }
                 }
             }
@@ -146,7 +174,7 @@ fun InicioScreen(
                 contentColor = Color.White,
                 modifier = Modifier
                     .size(56.dp)
-                    .padding(top = 16.dp) // Espacio adicional arriba del botón de cerrar sesión
+                    .padding(top = 16.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.ExitToApp,
@@ -154,6 +182,20 @@ fun InicioScreen(
                 )
             }
         }
+    }
+
+    // Cuadro de diálogo para Informe General
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            confirmButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cerrar")
+                }
+            },
+            title = { Text("Informe General") },
+            text = { Text("Próximas mejoras") }
+        )
     }
 }
 
@@ -195,7 +237,7 @@ fun OptionButton(
             },
             modifier = Modifier
                 .size(56.dp)
-                .shadow(4.dp, RoundedCornerShape(28.dp)), // Añadir sombra
+                .shadow(4.dp, RoundedCornerShape(28.dp)),
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
         ) {
             Icon(
@@ -225,3 +267,5 @@ fun OptionButton(
         }
     }
 }
+
+

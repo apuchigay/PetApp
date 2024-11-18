@@ -13,4 +13,5 @@ interface PaseoHistorialDao {
 
     @Query("SELECT * FROM PaseoHistorial WHERE mascota_id = :mascotaId")
     suspend fun getPaseosByMascotaId(mascotaId: Int): List<PaseoHistorial>
+
 }

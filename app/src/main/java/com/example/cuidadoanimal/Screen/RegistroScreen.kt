@@ -82,7 +82,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFFFEBEE),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -99,7 +99,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             modifier = Modifier.fillMaxWidth(),
             isError = !isValidEmail(email) && email.isNotEmpty(),  // Mostrar error si el correo no es válido
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFFFEBEE),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -126,7 +126,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             label = { Text("Teléfono") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFFFEBEE),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -145,7 +145,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             label = { Text("Dirección") },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFFFEBEE),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -191,7 +191,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
                 label = { Text("Especialidades (separadas por comas)") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.White,
+                    containerColor = Color(0xFFFFEBEE),
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
                 ),
@@ -210,7 +210,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFFFEBEE),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),
@@ -235,7 +235,7 @@ fun RegistroScreen(navController: NavHostController, db: CuidadoAnimalDatabase) 
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.White,
+                containerColor = Color(0xFFFFEBEE),
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent
             ),

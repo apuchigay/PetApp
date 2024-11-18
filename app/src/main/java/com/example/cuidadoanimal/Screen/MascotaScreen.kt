@@ -1,6 +1,7 @@
 package com.example.cuidadoanimal.Screen
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -17,11 +18,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.cuidadoanimal.Model.Mascota
+import com.example.cuidadoanimal.R
 import com.example.cuidadoanimal.Repository.MascotaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,6 +85,17 @@ fun MascotaScreen(
             .background(Color(0xFFF3F4F6))
             .padding(16.dp)
     ) {
+
+        // Imagen en la parte superior
+        Image(
+            painter = painterResource(id = R.drawable.perrologin), // Cambia este nombre por el nombre de tu imagen en drawable
+            contentDescription = "Imagen de Mascotas",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp) // Ajusta la altura según sea necesario
+                .padding(bottom = 16.dp),
+            contentScale = ContentScale.Crop // Ajusta la escala de la imagen
+        )
         IconButton(
             onClick = {
                 navController.navigate("inicio_screen/$clienteId")

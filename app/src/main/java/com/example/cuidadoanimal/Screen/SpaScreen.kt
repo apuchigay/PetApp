@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -91,7 +92,9 @@ fun SpaScreen(
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                     }
                 },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(16.dp), // Bordes redondeados
+
             )
 
             DropdownMenu(
@@ -126,7 +129,8 @@ fun SpaScreen(
                         Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = null)
                     }
                 },
-                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+                colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+                shape = RoundedCornerShape(16.dp), // Bordes redondeados
             )
 
             DropdownMenu(
@@ -163,12 +167,15 @@ fun SpaScreen(
                         calendar.get(Calendar.YEAR),
                         calendar.get(Calendar.MONTH),
                         calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
+                    ).apply {
+                        datePicker.minDate = System.currentTimeMillis() // Restringir fechas pasadas
+                    }.show()
                 }) {
                     Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp) // Bordes redondeados
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -193,7 +200,8 @@ fun SpaScreen(
                     Icon(imageVector = Icons.Default.DateRange, contentDescription = "Seleccionar hora")
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp) // Bordes redondeados
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -202,7 +210,9 @@ fun SpaScreen(
         OutlinedTextField(
             value = servicioSpa,
             onValueChange = { servicioSpa = it },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
+
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -214,7 +224,8 @@ fun SpaScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
-            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White)
+            colors = TextFieldDefaults.textFieldColors(containerColor = Color.White),
+            shape = RoundedCornerShape(16.dp), // Bordes redondeados
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -245,11 +256,24 @@ fun SpaScreen(
         }
 
         if (showMessage) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                "Servicio de Spa guardado exitosamente.",
-                color = Color.Green,
-                fontSize = 16.sp
+            AlertDialog(
+                onDismissRequest = { showMessage = false },
+                confirmButton = {
+                    TextButton(onClick = { showMessage = false }) {
+                        Text("Aceptar", color = Color.Black)
+                    }
+                },
+                title = {
+                    Text("Éxito", color = Color.Black)
+                },
+                text = {
+                    Text(
+                        "Servicio de Spa guardado exitosamente.",
+                        color = Color.Black
+                    )
+                },
+                containerColor = Color(0xFFFFEBEE), // Fondo del cuadro
+                shape = RoundedCornerShape(16.dp) // Bordes redondeados
             )
         }
     }
